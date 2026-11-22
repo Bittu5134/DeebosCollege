@@ -1,297 +1,342 @@
-import { useState, useEffect } from 'react';
-import PredictorForm from './components/PredictorForm';
-import RecommendationsList from './components/RecommendationsList';
-import QuestionnaireWizard from './components/QuestionnaireWizard';
-import StatsDashboardModal from './components/StatsDashboardModal';
+import { useEffect, useState } from 'react';
+import BrandMark from './components/BrandMark';
+import ProfileScreen from './components/ProfileScreen';
+import InterviewScreen from './components/InterviewScreen';
+import ResultsScreen from './components/ResultsScreen';
+import StatsModal from './components/StatsModal';
 import AuthModal from './components/AuthModal';
 import LegalPage from './components/LegalPage';
-import { BarChart3 } from 'lucide-react';
-import alphajeeLogo from './assets/logo.png';
+import api, { ApiError, getBackendCategory } from './api';
 
-
-const getSessionJSON = (key) => {
+const readSession = (key) => {
   try {
-    const val = sessionStorage.getItem(key);
-    return val ? JSON.parse(val) : null;
-  } catch { return null; }
+    const raw = sessionStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
 };
+
+const readUser = () => {
+  const raw = localStorage.getItem('alpha_user');
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
+
+const STEPS = [
+  { key: 'profile', num: '01', label: 'Profile', view: 'form' },
+  { key: 'interview', num: '02', label: 'Interview', view: 'questionnaire' },
+  { key: 'index', num: '03', label: 'Index', view: 'results' },
+];
 
 export default function App() {
   const [view, setView] = useState(() => sessionStorage.getItem('bw_view') || 'form');
-  const [previousView, setPreviousView] = useState(() => sessionStorage.getItem('bw_prev_view') || 'form');
+  const [previousView, setPreviousView] = useState(
+    () => sessionStorage.getItem('bw_prev_view') || 'form'
+  );
   const [loading, setLoading] = useState(false);
-  const [userInputs, setUserInputs] = useState(() => getSessionJSON('bw_userInputs'));
-  const [results, setResults] = useState(() => getSessionJSON('bw_results'));
-  const [questions, setQuestions] = useState([]);
-  const [initialProfile, setInitialProfile] = useState(null);
-
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem('alpha_user');
-    if (!stored) return null;
-    try {
-      return JSON.parse(stored);
-    } catch {
-      return null;
-    }
-  });
-  const [token, setToken] = useState(localStorage.getItem('alpha_token') || null);
-  const [showStatsModal, setShowStatsModal] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-
+  const [userInputs, setUserInputs] = useState(() => readSession('bw_userInputs'));
+  const [results, setResults] = useState(() => readSession('bw_results'));
+  const [questions, setQuestions] = useState(() => readSession('bw_questions') || []);
+  const [initialProfile, setInitialProfile] = useState(() => readSession('bw_initialProfile'));
+  const [user, setUser] = useState(readUser);
+  const [token, setToken] = useState(() => localStorage.getItem('alpha_token') || null);
+  const [showStats, setShowStats] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     sessionStorage.setItem('bw_view', view);
   }, [view]);
+
   useEffect(() => {
     sessionStorage.setItem('bw_prev_view', previousView);
   }, [previousView]);
+
   useEffect(() => {
     if (userInputs) sessionStorage.setItem('bw_userInputs', JSON.stringify(userInputs));
   }, [userInputs]);
+
   useEffect(() => {
     if (results) sessionStorage.setItem('bw_results', JSON.stringify(results));
   }, [results]);
 
-  const handleSignIn = () => {
-    setShowAuthModal(true);
-  };
+  useEffect(() => {
+    if (questions.length) sessionStorage.setItem('bw_questions', JSON.stringify(questions));
+    else sessionStorage.removeItem('bw_questions');
+  }, [questions]);
 
-  const handleAuthSuccess = (data) => {
-    setToken(data.access_token);
-    setUser(data.user);
-  };
+  useEffect(() => {
+    if (initialProfile) sessionStorage.setItem('bw_initialProfile', JSON.stringify(initialProfile));
+    else sessionStorage.removeItem('bw_initialProfile');
+  }, [initialProfile]);
 
   const handleSignOut = () => {
     localStorage.removeItem('alpha_token');
     localStorage.removeItem('alpha_user');
     setToken(null);
     setUser(null);
+    setError('');
   };
 
+  const handleAuthSuccess = (data) => {
+    setToken(data.access_token);
+    setUser(data.user);
+    localStorage.setItem('alpha_token', data.access_token);
+    localStorage.setItem('alpha_user', JSON.stringify(data.user));
+    setShowAuth(false);
+  };
 
-  const getBackendCategory = (category, gender) => {
-    let catPrefix;
-    if (category === "General") catPrefix = "OPEN";
-    else if (category === "OBC-NCL") catPrefix = "OBC_NCL";
-    else if (category === "SC") catPrefix = "SC";
-    else if (category === "ST") catPrefix = "ST";
-    else if (category === "EWS") catPrefix = "EWS";
-    else catPrefix = category;
+  const handleApiError = (err) => {
+    if (err instanceof ApiError && err.status === 401) {
+      handleSignOut();
+      setError('Your session expired. Sign in again.');
+      return;
+    }
+    setError(
+      err instanceof ApiError ? err.message : 'Could not reach the service. Please try again.'
+    );
+  };
 
-    const isFemale = gender === "Female";
-    return catPrefix + (isFemale ? "_Female" : "_Gender_Neutral");
+  const fetchRecommendations = async (inputs, profile) => {
+    setLoading(true);
+    try {
+      const data = await api.recommend(
+        {
+          rank: inputs.rank,
+          adv_rank: inputs.advRank || null,
+          query: inputs.preferences,
+          category: getBackendCategory(inputs.category, inputs.gender),
+          homestate: inputs.homeState,
+          exam_type: inputs.examType || 'Mains',
+          profile,
+        },
+        token
+      );
+      setResults(data);
+      setView('results');
+    } catch (err) {
+      handleApiError(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePredict = async (inputs) => {
+    setError('');
     setLoading(true);
     setUserInputs(inputs);
 
-
     try {
-      const followupPayload = {
-        query: inputs.preferences,
-        homestate: inputs.homeState
-      };
+      const data = await api.generateQuestions(
+        { query: inputs.preferences, homestate: inputs.homeState },
+        token
+      );
 
-      const response = await fetch(`/api/generate-questions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify(followupPayload)
-      });
-
-      if (response.status === 401) {
-        handleSignOut();
-        alert("Your session has expired. Please sign in again.");
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.questions && data.questions.length > 0) {
+      if (data?.questions?.length) {
         setQuestions(data.questions);
-        setInitialProfile(data.profile);
+        setInitialProfile(data.profile ?? null);
         setView('questionnaire');
       } else {
-
-        await handleFetchRecommendations(inputs, data.profile);
+        await fetchRecommendations(inputs, data?.profile ?? null);
       }
-    } catch (error) {
-      console.error("Error generating questions:", error);
-      alert("Could not reach the recommendation service. Please try again.");
+    } catch (err) {
+      handleApiError(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFetchRecommendations = async (inputs, profileObj) => {
-    setLoading(true);
-    const backendCategory = getBackendCategory(inputs.category, inputs.gender);
+  const handleQuestionnaireSubmit = (profile) => {
+    fetchRecommendations(userInputs, profile);
+  };
 
-    const payload = {
-      rank: inputs.rank,
-      adv_rank: inputs.advRank || null,
-      query: inputs.preferences,
-      category: backendCategory,
-      homestate: inputs.homeState,
-      exam_type: inputs.examType || "Mains",
-      profile: profileObj
-    };
+  const handleRefinePreferences = (text) => {
+    const updated = { ...userInputs, preferences: text };
+    setUserInputs(updated);
+    fetchRecommendations(updated, null);
+  };
 
-    try {
-      const response = await fetch(`/api/recommend`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify(payload)
-      });
+  const openStats = () => setShowStats(true);
+  const closeStats = () => setShowStats(false);
+  const openAuth = () => setShowAuth(true);
+  const closeAuth = () => setShowAuth(false);
 
-      if (response.status === 401) {
-        handleSignOut();
-        alert("Your session has expired. Please sign in again.");
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setResults(data);
+  const navigate = (step) => {
+    if (step === 'profile') {
+      setView('form');
+      return;
+    }
+    if (step === 'interview' && questions.length) {
+      setView('questionnaire');
+      return;
+    }
+    if (step === 'index' && results) {
       setView('results');
-    } catch (error) {
-      console.error("Error fetching recommendations:", error);
-      alert("Could not reach the recommendation service. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleQuestionnaireSubmit = async (completedProfile) => {
-    await handleFetchRecommendations(userInputs, completedProfile);
+  const showLegal = (type) => {
+    if (view !== 'privacy' && view !== 'terms') setPreviousView(view);
+    setView(type);
   };
 
-  const handleRefinePreferences = async (newPreferences) => {
-    const updatedInputs = { ...userInputs, preferences: newPreferences };
-    setUserInputs(updatedInputs);
-    await handleFetchRecommendations(updatedInputs, null);
+  const stepAvailability = {
+    profile: true,
+    interview: questions.length > 0,
+    index: Boolean(results),
   };
 
+  const isLegal = view === 'privacy' || view === 'terms';
+  const initial = (user?.profile?.display_name || user?.name || user?.username || 'S')
+    .trim()
+    .charAt(0);
+  const displayName = user?.profile?.display_name || user?.name || user?.username || 'Student';
 
-  const isDev = Boolean(user);
-
-  return (
-    <div className="app-container">
-      <header className="header">
-        <div className="logo" onClick={() => setView('form')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img src={alphajeeLogo} alt="BranchWise" style={{ height: '32px', width: '32px', objectFit: 'contain' }} />
-          <span>Branch<span className="logo-highlight">Wise</span> <span style={{ fontSize: '11px', fontWeight: '400', color: 'var(--text-muted)', marginLeft: '4px' }}>College Predictor</span></span>
-        </div>
-        <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-
-          {user ? (
-            <div className="user-profile-menu" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              {isDev && (
-                <button className="stats-dashboard-trigger-btn" onClick={() => setShowStatsModal(true)}>
-                  <BarChart3 size={16} /> <span className="hide-mobile">Dashboard</span>
-                </button>
-              )}
-              <div className="avatar-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <img
-                  src={user.profile?.avatar_url || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'}
-                  alt={user.profile?.display_name || user.username}
-                  className="user-avatar"
-                  style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--primary-green)' }}
-                />
-                <span className="user-name-display" style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-secondary)' }}>
-                  {user.profile?.display_name || user.username}
-                </span>
-                <button className="sign-out-btn-small" onClick={handleSignOut}>Sign Out</button>
-              </div>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-
-              <button className="sign-in-btn" onClick={handleSignIn}>
-                Sign In
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
-
-      {loading ? (
-        <div className="predictor-main">
-          <div className="loader-wrapper">
-            <div className="spinner"></div>
-            <span className="loader-text">Analyzing preferences with our RAG Engine...</span>
-          </div>
-        </div>
-      ) : view === 'form' ? (
-        <PredictorForm
-          onSubmit={handlePredict}
-          loading={loading}
-        />
-      ) : view === 'questionnaire' ? (
-        <QuestionnaireWizard
+  const renderScreen = () => {
+    if (isLegal) {
+      return <LegalPage type={view} onBack={() => setView(previousView)} />;
+    }
+    if (view === 'questionnaire' && questions.length) {
+      return (
+        <InterviewScreen
           questions={questions}
           initialProfile={initialProfile}
           onSubmit={handleQuestionnaireSubmit}
           onCancel={() => setView('form')}
           onSkipAll={() => handleQuestionnaireSubmit(initialProfile)}
         />
-      ) : view === 'privacy' || view === 'terms' ? (
-        <LegalPage
-          type={view}
-          onBack={() => setView(previousView)}
-        />
-      ) : (
-        <RecommendationsList
+      );
+    }
+    if (view === 'results' && results) {
+      return (
+        <ResultsScreen
           results={results}
           userInputs={userInputs}
           token={token}
           onEdit={() => setView('form')}
           onRefinePreferences={handleRefinePreferences}
         />
-      )}
-
-      {/* Modals */}
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={handleAuthSuccess}
+      );
+    }
+    return (
+      <ProfileScreen
+        initialValues={userInputs}
+        onSubmit={handlePredict}
+        loading={loading}
+        onOpenStats={openStats}
       />
-      <StatsDashboardModal
-        isOpen={showStatsModal}
-        onClose={() => setShowStatsModal(false)}
-        token={token}
-      />
+    );
+  };
 
-      {/* Footer */}
-      <footer className="footer">
-        <span>© 2026 BranchWise. MERITVERSE PRIVATE LIMITED.</span>
-        <span className="footer-devs" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Devs: Yash Akarsh and Samarth Ravishankar</span>
-        <div className="footer-links">
-          <a href="#privacy" onClick={(e) => {
-            e.preventDefault();
-            if (view !== 'privacy' && view !== 'terms') setPreviousView(view);
-            setView('privacy');
-          }}>Privacy Policy</a>
-          <a href="#terms" onClick={(e) => {
-            e.preventDefault();
-            if (view !== 'privacy' && view !== 'terms') setPreviousView(view);
-            setView('terms');
-          }}>Terms of Service</a>
+  return (
+    <div className="app-shell">
+      <header className="topbar">
+        <button
+          type="button"
+          className="topbar__brand"
+          onClick={() => navigate('profile')}
+          aria-label="Deebo's College, go to profile"
+        >
+          <BrandMark />
+          <span className="wordmark">
+            Deebo's College
+            <span className="wordmark__sub">JoSAA index</span>
+          </span>
+        </button>
+
+        <nav className="index-nav" aria-label="Search steps">
+          {STEPS.map((step) => {
+            const active = view === step.view;
+            return (
+              <button
+                key={step.key}
+                type="button"
+                className={`index-nav__item${active ? ' is-active' : ''}`}
+                onClick={() => navigate(step.key)}
+                disabled={!stepAvailability[step.key]}
+                aria-current={active ? 'step' : undefined}
+              >
+                <span className="index-nav__num">{step.num}</span>
+                {step.label}
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="topbar__actions">
+          <button
+            type="button"
+            className="btn btn--text btn--sm"
+            onClick={openStats}
+          >
+            Stats
+          </button>          {user ? (
+            <div className="user-menu">
+              <span className="avatar" aria-hidden="true">
+                {initial}
+              </span>
+              <span className="user-menu__name">{displayName}</span>
+              <button type="button" className="btn btn--text btn--sm" onClick={handleSignOut}>
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="btn btn--ghost btn--sm"
+              onClick={openAuth}
+            >
+              Sign in
+            </button>
+          )}
         </div>
+      </header>
+
+      {error ? (
+        <div className="error-banner" role="alert">
+          <span>{error}</span>
+          <button
+            type="button"
+            className="error-banner__dismiss"
+            onClick={() => setError('')}
+            aria-label="Dismiss message"
+          >
+            Dismiss
+          </button>
+        </div>
+      ) : null}
+
+      <main className="main">
+        {loading ? (
+          <div className="loading-screen">
+            <span className="loading-line" aria-hidden="true" />
+            <span>Matching your rank against the index...</span>
+          </div>
+        ) : (
+          renderScreen()
+        )}
+      </main>
+
+      <footer className="colophon">
+        <span>Data: JoSAA 2024 Round 5 and 2025</span>
+        <div className="colophon__links">
+          <button type="button" className="btn btn--text btn--sm" onClick={() => showLegal('privacy')}>
+            Privacy
+          </button>
+          <button type="button" className="btn btn--text btn--sm" onClick={() => showLegal('terms')}>
+            Terms
+          </button>
+        </div>
+        <span>Deebo's College</span>
       </footer>
+
+      <AuthModal isOpen={showAuth} onClose={closeAuth} onSuccess={handleAuthSuccess} />
+      <StatsModal isOpen={showStats} onClose={closeStats} token={token} />
     </div>
   );
 }
