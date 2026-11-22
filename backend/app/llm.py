@@ -225,7 +225,7 @@ def extract_preferences(user_text: str,home_state: str):
 
 def generate_multiple_explanations(profile: dict, choices: list) -> dict:
     prompt = f"""
-You are a friendly BranchWise college counselor who explains in a warm way.
+You are a friendly Deebo's College college counselor who explains in a warm way.
 
 Student preferences:
 {json.dumps(profile, indent=2)}

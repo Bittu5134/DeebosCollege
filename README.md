@@ -1,13 +1,13 @@
-# BranchWise
+# Deebo's College
 
-BranchWise is a JEE college predictor and JoSAA counselling helper. It filters IIT, NIT and IIIT branch cutoffs against a student's rank and category, then ranks the surviving branches with a small retrieval pipeline over college, placement and campus data. The result can be exported as a JoSAA choice list.
+Deebo's College is a JEE college predictor and JoSAA counselling helper. It filters IIT, NIT and IIIT branch cutoffs against a student's rank and category, then ranks the surviving branches with a small retrieval pipeline over college, placement and campus data. The result can be exported as a JoSAA choice list.
 
 ## What it does
 
 - Filters branches by JEE Main or Advanced rank, category, gender and home state.
 - Handles IIT home state, other state, Goa, Jammu and Kashmir and Ladakh quota categories.
 - Ranks branches with a hybrid of sentence-embedding similarity (Qdrant) and structured signals such as NIRF rank, placement percentage and CTC.
-- Uses Gemini to turn a free-text preference into a profile, generate follow-up questions and explain the top recommendations.
+- Uses Gemini or an OpenAI-compatible model to turn preferences into a profile, generate follow-up questions and explain the top recommendations.
 - Exports the shortlist as a CSV choice list.
 - Shows aggregate search and placement statistics.
 

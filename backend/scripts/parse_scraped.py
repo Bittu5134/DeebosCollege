@@ -8,7 +8,7 @@ OUTPUT_DIR = STRUCTURED_JSON_DIR
 
 
 SYSTEM_INSTRUCTION = """
-You are a strict data parsing agent for BranchWise. Your job is to convert unstructured college markdown data into a valid JSON object.
+You are a strict data parsing agent for Deebo's College. Your job is to convert unstructured college markdown data into a valid JSON object.
 You must adhere strictly to the following keys and data types. 
 
 Handling Missing Data:

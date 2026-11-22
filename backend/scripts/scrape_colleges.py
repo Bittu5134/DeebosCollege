@@ -25,7 +25,7 @@ IIT_TARGETS = [
 ]
 
 MASTER_PROMPT_TEMPLATE = """
-You are acting as an automated data aggregation agent for BranchWise. Your task is to navigate the web using Playwright to extract concrete, verifiable facts about {iit_name} (URL: {base_url}).
+You are acting as an automated data aggregation agent for Deebo's College. Your task is to navigate the web using Playwright to extract concrete, verifiable facts about {iit_name} (URL: {base_url}).
 
 ### TARGET DATA POINTS TO EXTRACT:
 1. NIRF Ranking: Latest engineering rank.

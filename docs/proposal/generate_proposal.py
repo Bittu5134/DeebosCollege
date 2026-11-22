@@ -131,7 +131,7 @@ def create_proposal_document(filename=DEFAULT_OUTPUT):
     p_team.paragraph_format.space_after = Pt(1)
     r_tname_lbl = p_team.add_run("Team Name: ")
     set_font(r_tname_lbl, 'Calibri', 9, bold=True, color=BLACK)
-    r_tname = p_team.add_run("BranchWise Dynamics")
+    r_tname = p_team.add_run("Deebo's College Dynamics")
     set_font(r_tname, 'Calibri', 9, bold=False, color=DARK)
 
     p_members = doc.add_paragraph()
@@ -158,12 +158,12 @@ def create_proposal_document(filename=DEFAULT_OUTPUT):
     p_title.paragraph_format.space_after = Pt(1.5)
     r_title_lbl = p_title.add_run("Project Title: ")
     set_font(r_title_lbl, 'Calibri', 9, bold=True, color=BLACK)
-    r_title = p_title.add_run("BranchWise: AI-Powered JEE College Predictor & Counseling Assistant")
+    r_title = p_title.add_run("Deebo's College: AI-Powered JEE College Predictor & Counseling Assistant")
     set_font(r_title, 'Calibri', 9, bold=True, color=NAVY)
 
     add_labeled_paragraph(
         "Overall Project Description",
-        "BranchWise is an intelligent web platform designed to guide engineering aspirants through JoSAA/CSAB counseling. "
+        "Deebo's College is an intelligent web platform designed to guide engineering aspirants through JoSAA/CSAB counseling. "
         "It matches student JEE Main and Advanced ranks against official closing ranks across 80+ IITs, NITs, and IIITs. "
         "Beyond simple cutoff filtering, the platform utilizes hybrid retrieval-augmented generation (RAG) to recommend colleges and "
         "branches matching candidate preferences, such as placement CTCs, coding culture, startup incubation, research orientation, "

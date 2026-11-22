@@ -198,7 +198,7 @@ def log_user_search(db: Session, rank: int, category: str, exam_type: str | None
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="BranchWise API",
+    title="Deebo's College API",
     version="1.0.0",
     description="JEE college recommendation API"
 )
@@ -241,7 +241,7 @@ def auth_login(request: LoginRequest):
 @app.get("/")
 def root():
     return {
-        "service": "BranchWise API",
+        "service": "Deebo's College API",
         "version": "1.0.0",
         "status": "ok"
     }

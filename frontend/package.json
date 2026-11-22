@@ -1,8 +1,8 @@
 {
-  "name": "branchwise-frontend",
+  "name": "deebos-college-frontend",
   "private": true,
   "version": "1.0.0",
-  "description": "BranchWise JEE college predictor frontend",
+  "description": "Deebo's College JEE college predictor frontend",
   "type": "module",
   "scripts": {
     "dev": "vite",
