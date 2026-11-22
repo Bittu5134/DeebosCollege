@@ -3,6 +3,9 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
+echo "Waiting for the backend to become healthy..."
+docker compose up -d --wait
+
 echo "Populating PostgreSQL from data/structured_json..."
 docker compose exec backend python -m scripts.ingest_colleges
 

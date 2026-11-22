@@ -58,8 +58,11 @@ Backend:
 cd backend
 python -m venv .venv
 source .venv/bin/activate
+pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt
 ```
+
+The CPU-only torch wheel avoids downloading the much larger CUDA build on a machine without a GPU.
 
 For a backend running on the host, `DATABASE_URL` in `.env` must point at `localhost` instead of the Compose service name `postgres`:
 
