@@ -60,5 +60,19 @@ Thumbs.db
 # Local agent config
 .pi/
 
+# Impeccable runtime material
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/questions/
+.impeccable/build/
+.impeccable/reference/
+.impeccable/config.local.json
+
 # Generated course document
 docs/proposal.docx
+
+
+
+node_modules
+package-lock.json
+package.json
