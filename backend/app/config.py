@@ -30,8 +30,14 @@ ALLOWED_ORIGINS = [
     if origin.strip()
 ]
 
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini").strip().lower()
 LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.5-flash")
 USE_VERTEX = os.getenv("USE_VERTEX", "false").lower() == "true"
 GCP_PROJECT = os.getenv("GCP_PROJECT")
 GCP_LOCATION = os.getenv("GCP_LOCATION", "us-central1")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "").strip()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+OPENAI_API_MODE = os.getenv("OPENAI_API_MODE", "chat").strip().lower()

@@ -7,6 +7,11 @@ from .config import (
     GCP_PROJECT,
     GEMINI_API_KEY,
     LLM_MODEL,
+    LLM_PROVIDER,
+    OPENAI_API_KEY,
+    OPENAI_API_MODE,
+    OPENAI_BASE_URL,
+    OPENAI_MODEL,
     USE_VERTEX,
 )
 
@@ -31,7 +36,7 @@ def extract_json_from_text(text: str) -> str:
 
 
 @lru_cache(maxsize=1)
-def _get_client():
+def _get_gemini_client():
     from google import genai
 
     if USE_VERTEX:
@@ -45,10 +50,59 @@ def _get_client():
 
     if not GEMINI_API_KEY:
         raise RuntimeError(
-            "No LLM credentials configured. Set GEMINI_API_KEY or enable USE_VERTEX with GCP_PROJECT."
+            "No Gemini credentials configured. Set GEMINI_API_KEY or enable USE_VERTEX with GCP_PROJECT."
         )
 
     return genai.Client(api_key=GEMINI_API_KEY)
+
+
+@lru_cache(maxsize=1)
+def _get_openai_client():
+    from openai import OpenAI
+
+    if not OPENAI_BASE_URL and not OPENAI_API_KEY:
+        raise RuntimeError(
+            "Set OPENAI_BASE_URL for a compatible endpoint, or OPENAI_API_KEY for api.openai.com."
+        )
+
+    kwargs = {"api_key": OPENAI_API_KEY or "not-needed"}
+    if OPENAI_BASE_URL:
+        kwargs["base_url"] = OPENAI_BASE_URL
+    return OpenAI(**kwargs)
+
+
+def _generate(prompt: str) -> str:
+    if LLM_PROVIDER in {"openai", "openai-compatible", "compatible"}:
+        client = _get_openai_client()
+
+        if OPENAI_API_MODE in {"responses", "response"}:
+            response = client.responses.create(
+                model=OPENAI_MODEL,
+                input=prompt,
+            )
+            return response.output_text or ""
+
+        if OPENAI_API_MODE in {"chat", "chat-completions", "completions"}:
+            response = client.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return response.choices[0].message.content or ""
+
+        raise RuntimeError(
+            f"Unknown OPENAI_API_MODE '{OPENAI_API_MODE}'. Use 'chat' or 'responses'."
+        )
+
+    if LLM_PROVIDER in {"gemini", "google"}:
+        response = _get_gemini_client().models.generate_content(
+            model=LLM_MODEL,
+            contents=prompt
+        )
+        return response.text
+
+    raise RuntimeError(
+        f"Unknown LLM_PROVIDER '{LLM_PROVIDER}'. Use 'gemini' or 'openai'."
+    )
 
 
 def generate_followup_questions(
@@ -106,12 +160,8 @@ Example:
 ]
 """
 
-    response = _get_client().models.generate_content(
-        model=LLM_MODEL,
-        contents=prompt
-    )
-
-    text = extract_json_from_text(response.text)
+    response = _generate(prompt)
+    text = extract_json_from_text(response)
     return json.loads(text)
 
 
@@ -168,12 +218,8 @@ def extract_preferences(user_text: str,home_state: str):
     7. CRITICAL RULE FOR BRANCH CATEGORIES: If the student specifies a specific branch group (e.g., "circuital branches", "circuital only", "cs only", etc.), do NOT expand it to include unrelated branch groups in vector_query. For example, if the student asks for "circuital branches", do NOT include "computer", "software", "IT", "cse", "cs" in the vector_query. Similarly, if they ask for "computer science" or "software", do NOT include circuital/electrical/electronics/mechanical keywords.
         """
 
-    response = _get_client().models.generate_content(
-        model=LLM_MODEL,
-        contents=prompt
-    )
-
-    text = extract_json_from_text(response.text)
+    response = _generate(prompt)
+    text = extract_json_from_text(response)
     return json.loads(text)
 
 
@@ -199,9 +245,6 @@ Example:
   "1": "This fits because... 🎨"
 }}
 """
-    response = _get_client().models.generate_content(
-        model=LLM_MODEL,
-        contents=prompt
-    )
-    text = extract_json_from_text(response.text)
+    response = _generate(prompt)
+    text = extract_json_from_text(response)
     return json.loads(text)

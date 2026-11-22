@@ -15,7 +15,7 @@ BranchWise is a JEE college predictor and JoSAA counselling helper. It filters I
 
 - Backend: FastAPI, SQLAlchemy, PostgreSQL 16
 - Retrieval: Qdrant with `BAAI/bge-small-en-v1.5` embeddings
-- LLM: Google Gemini through `google-genai`
+- LLM: Google Gemini or any OpenAI-compatible chat or responses endpoint
 - Frontend: React 19 and Vite, served by Nginx
 - Packaging: Docker Compose
 
@@ -80,6 +80,24 @@ npm run dev
 ```
 
 Vite proxies `/api` to `http://localhost:8000`.
+
+## Using a different LLM
+
+The default provider is Gemini. To use an OpenAI-compatible endpoint instead, set:
+
+```ini
+LLM_PROVIDER=openai
+OPENAI_BASE_URL=https://your-provider.example/v1
+OPENAI_API_KEY=your_key
+OPENAI_MODEL=your-model
+OPENAI_API_MODE=chat
+```
+
+Use `OPENAI_API_MODE=chat` for `/chat/completions` and `OPENAI_API_MODE=responses` for `/responses` endpoints. Some providers serve different models on different wires, so check their model list.
+
+If the endpoint runs on your host and the backend runs in Docker, `localhost` points at the container. Use `host.docker.internal` or the host IP instead.
+
+Without any LLM credentials the app still returns cutoff-based recommendations and an empty question list. Only preference extraction and explanations are disabled.
 
 ## Data pipeline
 
