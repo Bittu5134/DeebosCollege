@@ -1,0 +1,153 @@
+@font-face {
+  font-family: 'Source Serif 4';
+  src: url('/fonts/source-serif-4-latin.woff2') format('woff2');
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  src: url('/fonts/source-serif-4-latin-ext.woff2') format('woff2');
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  src: url('/fonts/source-serif-4-italic-latin.woff2') format('woff2');
+  font-weight: 200 900;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  src: url('/fonts/source-serif-4-italic-latin-ext.woff2') format('woff2');
+  font-weight: 200 900;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Commit Mono';
+  src: url('/fonts/CommitMono-400-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Commit Mono';
+  src: url('/fonts/CommitMono-700-Regular.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Departure Mono';
+  src: url('/fonts/DepartureMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+
+  --bg-deep: #0d1116;
+  --bg-canvas: #161d27;
+  --panel: #212730;
+  --panel-soft: #252f3d;
+  --line: #49505980;
+  --line-strong: #757d8975;
+  --text: #ebe7e4;
+  --copy: #ebe7e4d9;
+  --muted: #a8adb4;
+  --accent: #6a9fcc;
+  --reach: #b86b52;
+  --target: #e1b06e;
+  --safe: #a3a473;
+  --neutral-data: #4b607c;
+  --danger: #e8704f;
+  --selection: #6a9fcc3d;
+
+  --serif: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
+  --mono: 'Commit Mono', 'SFMono-Regular', Menlo, monospace;
+  --accent-mono: 'Departure Mono', 'Commit Mono', monospace;
+
+  --fs-display: 64px;
+  --lh-display: 1.02;
+  --fs-h2: 40px;
+  --lh-h2: 1.08;
+  --fs-h3: 28px;
+  --lh-h3: 1.15;
+  --fs-institute: 17px;
+  --lh-institute: 1.3;
+  --fs-body: 15px;
+  --lh-body: 1.55;
+  --fs-compact: 14px;
+  --lh-compact: 1.5;
+  --fs-label: 11px;
+  --lh-label: 1.2;
+  --tracking-label: 0.08em;
+  --fs-data: 13px;
+  --lh-data: 1.4;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 20px;
+  --space-5: 40px;
+  --space-6: 60px;
+  --space-7: 80px;
+
+  --gutter: 20px;
+  --max-width: 1400px;
+  --topbar-height: 64px;
+
+  --radius: 0;
+  --radius-sm: 0;
+  --radius-none: 0;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 120ms;
+  --t-base: 160ms;
+  --transition: border-color var(--t-fast) var(--ease-out),
+    background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out);
+
+  --z-topbar: 100;
+  --z-modal: 200;
+}
+
+@media (min-width: 900px) {
+  :root {
+    --gutter: 40px;
+  }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --fs-display: 40px;
+    --fs-h2: 28px;
+    --topbar-height: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --fs-display: 36px;
+  }
+}
