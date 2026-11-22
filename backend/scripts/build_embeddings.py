@@ -144,6 +144,7 @@ def main():
         print(f"Wrote {written} vectors to {QDRANT_COLLECTION}.")
     finally:
         db.close()
+        client.close()
 
 
 if __name__ == "__main__":

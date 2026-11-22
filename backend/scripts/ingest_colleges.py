@@ -9,17 +9,28 @@ from sqlalchemy import text
 
 from app import crud
 from app.config import STRUCTURED_JSON_DIR
-from app.database import SessionLocal
+from app.database import Base, SessionLocal, engine
+from app.models import Branch, BranchCutoff, College
 
 FOLDERS = ["iit", "i3t", "nit"]
 
 
+def clear_tables(db):
+    if db.get_bind().dialect.name == "postgresql":
+        db.execute(text("TRUNCATE TABLE branch_cutoffs, branches, colleges RESTART IDENTITY CASCADE;"))
+    else:
+        db.query(BranchCutoff).delete()
+        db.query(Branch).delete()
+        db.query(College).delete()
+    db.commit()
+
+
 def main():
+    Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
-        print("Clearing tables colleges, branches, and branch_cutoffs...")
-        db.execute(text("TRUNCATE TABLE branch_cutoffs, branches, colleges RESTART IDENTITY CASCADE;"))
-        db.commit()
+        print("Clearing colleges, branches, and branch_cutoffs...")
+        clear_tables(db)
         print("Tables cleared successfully.")
 
         index = 1

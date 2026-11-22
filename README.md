@@ -27,7 +27,7 @@ You need Docker with Compose v2.
 cp .env.example .env
 ```
 
-Edit `.env` and set at least `GEMINI_API_KEY`, `POSTGRES_PASSWORD` and `SESSION_SECRET`.
+Edit `.env` and set `POSTGRES_PASSWORD`, `SESSION_SECRET`, and either the Gemini or OpenAI-compatible LLM values.
 
 ```bash
 docker compose up --build -d
@@ -42,36 +42,47 @@ The first build downloads a CPU-only PyTorch wheel and the embedding model, so i
 
 `init-data.sh` loads the seed JSON into PostgreSQL and rebuilds the Qdrant collection. Run it again whenever `data/structured_json` changes.
 
-## Running locally
+## Running locally without Docker
 
-Requirements: Python 3.11, Node 20 or newer, PostgreSQL 16, Qdrant.
+Requirements: Python 3.11 or newer and Node 20 or newer. Python 3.14 works.
 
-Start the databases first:
+### Quick run with SQLite
 
-```bash
-docker compose up -d postgres qdrant
-```
-
-Backend:
+This is the fastest way to test on one machine. It needs no PostgreSQL server and no Qdrant server. SQLite is the database and Qdrant runs in local mode.
 
 ```bash
 cd backend
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt
-```
 
-The CPU-only torch wheel avoids downloading the much larger CUDA build on a machine without a GPU.
+export DATABASE_URL=sqlite:///$PWD/../data/local.db
+export QDRANT_URL=
+export QDRANT_PATH=$PWD/../qdrant_local
 
-For a backend running on the host, `DATABASE_URL` in `.env` must point at `localhost` instead of the Compose service name `postgres`:
-
-```bash
-export DATABASE_URL=postgresql+psycopg2://postgres:change_me@localhost:5432/college_predictor
+python -m scripts.ingest_colleges
+python -m scripts.build_embeddings
 uvicorn app.main:app --reload
 ```
 
-Frontend:
+Stop the API before rerunning `build_embeddings`, because local Qdrant locks its directory. The SQLite file and `qdrant_local/` are gitignored local state.
+
+### PostgreSQL path
+
+Use this when you want the same database as Docker. Install PostgreSQL 16, create a database, and export a local URL:
+
+```bash
+export DATABASE_URL=postgresql+psycopg2://postgres:YOUR_PASSWORD@localhost:5432/college_predictor
+export QDRANT_URL=
+export QDRANT_PATH=$PWD/../qdrant_local
+```
+
+Run the two scripts and `uvicorn` as above. If you have a Qdrant server running, set `QDRANT_URL=http://localhost:6333` instead of using local mode.
+
+### Frontend
+
+In another terminal:
 
 ```bash
 cd frontend
