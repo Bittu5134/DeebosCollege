@@ -1,0 +1,34 @@
+.git/
+.gitignore
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+
+# Data is mounted at runtime, not baked into the image
+data/
+qdrant_storage/
+Colleges_data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Docs and local config
+docs/
+.pi/
+logs/
+*.log
