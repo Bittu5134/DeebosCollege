@@ -100,6 +100,10 @@
 }
 
 .results-note__text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   font-family: var(--mono);
   font-size: var(--fs-data);
   line-height: var(--lh-data);
