@@ -265,9 +265,9 @@ export default function InterviewScreen({
             </div>
 
             <p className="interview-keys">
-              <span>A or 1 for yes</span>
-              <span>B or 2 for no</span>
-              <span>Left arrow to go back</span>
+              <span>A or 1 = Yes</span>
+              <span>B or 2 = No</span>
+              <span>← Previous</span>
             </p>
 
             <div className="interview-footer">
@@ -276,9 +276,6 @@ export default function InterviewScreen({
               </button>
               <button type="button" className="btn btn--text" onClick={skipQuestion}>
                 Skip this question
-              </button>
-              <button type="button" className="btn btn--text" onClick={skipAll}>
-                Skip all questions
               </button>
             </div>
           </div>
