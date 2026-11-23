@@ -1,0 +1,476 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-23T21:30:00+05:30",
+  "title": "Design System: Deebo's College",
+  "extensions": {
+    "colorMeta": {
+      "deep-ink": {
+        "role": "neutral",
+        "displayName": "Deep Ink",
+        "hex": "#0d1116",
+        "purpose": "Page ground. The only page background in the system.",
+        "canonical": "oklch(18% 0.02 250)",
+        "tonalRamp": [
+          "oklch(16% 0.02 250)",
+          "oklch(23% 0.02 250)",
+          "oklch(30% 0.02 250)",
+          "oklch(38% 0.02 250)",
+          "oklch(47% 0.02 250)",
+          "oklch(57% 0.02 250)",
+          "oklch(68% 0.02 250)",
+          "oklch(79% 0.02 250)",
+          "oklch(89% 0.02 250)",
+          "oklch(95% 0.02 250)"
+        ]
+      },
+      "ledger-canvas": {
+        "role": "neutral",
+        "displayName": "Ledger Canvas",
+        "hex": "#161d27",
+        "purpose": "Modal cards, detail rows, inset surfaces.",
+        "canonical": "oklch(22% 0.025 250)",
+        "tonalRamp": [
+          "oklch(16% 0.025 250)",
+          "oklch(23% 0.025 250)",
+          "oklch(30% 0.025 250)",
+          "oklch(38% 0.025 250)",
+          "oklch(47% 0.025 250)",
+          "oklch(57% 0.025 250)",
+          "oklch(68% 0.025 250)",
+          "oklch(79% 0.025 250)",
+          "oklch(89% 0.025 250)",
+          "oklch(95% 0.025 250)"
+        ]
+      },
+      "slate-panel": {
+        "role": "neutral",
+        "displayName": "Slate Panel",
+        "hex": "#212730",
+        "purpose": "Inputs, hover wash on rows, figure panels.",
+        "canonical": "oklch(26% 0.02 250)",
+        "tonalRamp": [
+          "oklch(16% 0.02 250)",
+          "oklch(23% 0.02 250)",
+          "oklch(30% 0.02 250)",
+          "oklch(38% 0.02 250)",
+          "oklch(47% 0.02 250)",
+          "oklch(57% 0.02 250)",
+          "oklch(68% 0.02 250)",
+          "oklch(79% 0.02 250)",
+          "oklch(89% 0.02 250)",
+          "oklch(95% 0.02 250)"
+        ]
+      },
+      "slate-panel-raised": {
+        "role": "neutral",
+        "displayName": "Slate Panel Raised",
+        "hex": "#252f3d",
+        "purpose": "Quiet button hover, pressed states.",
+        "canonical": "oklch(30% 0.03 250)",
+        "tonalRamp": [
+          "oklch(16% 0.03 250)",
+          "oklch(23% 0.03 250)",
+          "oklch(30% 0.03 250)",
+          "oklch(38% 0.03 250)",
+          "oklch(47% 0.03 250)",
+          "oklch(57% 0.03 250)",
+          "oklch(68% 0.03 250)",
+          "oklch(79% 0.03 250)",
+          "oklch(89% 0.03 250)",
+          "oklch(95% 0.03 250)"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "hex": "#49505980",
+        "purpose": "Row dividers, table rules, borders at rest."
+      },
+      "hairline-strong": {
+        "role": "neutral",
+        "displayName": "Hairline Strong",
+        "hex": "#757d8975",
+        "purpose": "Bottom rules under headers, chip borders, hover borders."
+      },
+      "parchment": {
+        "role": "neutral",
+        "displayName": "Parchment",
+        "hex": "#ebe7e4",
+        "purpose": "Primary text, institute names, headings.",
+        "canonical": "oklch(92% 0.01 75)",
+        "tonalRamp": [
+          "oklch(16% 0.01 75)",
+          "oklch(23% 0.01 75)",
+          "oklch(30% 0.01 75)",
+          "oklch(38% 0.01 75)",
+          "oklch(47% 0.01 75)",
+          "oklch(57% 0.01 75)",
+          "oklch(68% 0.01 75)",
+          "oklch(79% 0.01 75)",
+          "oklch(89% 0.01 75)",
+          "oklch(95% 0.01 75)"
+        ]
+      },
+      "parchment-dim": {
+        "role": "neutral",
+        "displayName": "Parchment Dim",
+        "hex": "#ebe7e4d9",
+        "purpose": "Body copy, secondary text.",
+        "canonical": "oklch(90% 0.01 75)",
+        "tonalRamp": [
+          "oklch(16% 0.01 75)",
+          "oklch(23% 0.01 75)",
+          "oklch(30% 0.01 75)",
+          "oklch(38% 0.01 75)",
+          "oklch(47% 0.01 75)",
+          "oklch(57% 0.01 75)",
+          "oklch(68% 0.01 75)",
+          "oklch(79% 0.01 75)",
+          "oklch(89% 0.01 75)",
+          "oklch(95% 0.01 75)"
+        ]
+      },
+      "faded-slate": {
+        "role": "neutral",
+        "displayName": "Faded Slate",
+        "hex": "#a8adb4",
+        "purpose": "Muted labels, folios, placeholders.",
+        "canonical": "oklch(72% 0.015 250)",
+        "tonalRamp": [
+          "oklch(16% 0.015 250)",
+          "oklch(23% 0.015 250)",
+          "oklch(30% 0.015 250)",
+          "oklch(38% 0.015 250)",
+          "oklch(47% 0.015 250)",
+          "oklch(57% 0.015 250)",
+          "oklch(68% 0.015 250)",
+          "oklch(79% 0.015 250)",
+          "oklch(89% 0.015 250)",
+          "oklch(95% 0.015 250)"
+        ]
+      },
+      "tidal-blue": {
+        "role": "primary",
+        "displayName": "Tidal Blue",
+        "hex": "#6a9fcc",
+        "purpose": "The single accent. Primary actions, active step, focus.",
+        "canonical": "oklch(70% 0.09 245)",
+        "tonalRamp": [
+          "oklch(16% 0.09 245)",
+          "oklch(23% 0.09 245)",
+          "oklch(30% 0.09 245)",
+          "oklch(38% 0.09 245)",
+          "oklch(47% 0.09 245)",
+          "oklch(57% 0.09 245)",
+          "oklch(68% 0.09 245)",
+          "oklch(79% 0.09 245)",
+          "oklch(89% 0.09 245)",
+          "oklch(95% 0.09 245)"
+        ]
+      },
+      "terracotta": {
+        "role": "secondary",
+        "displayName": "Terracotta",
+        "hex": "#b86b52",
+        "purpose": "Reach state. Closing ranks harder than the student rank.",
+        "canonical": "oklch(58% 0.11 40)",
+        "tonalRamp": [
+          "oklch(16% 0.11 40)",
+          "oklch(23% 0.11 40)",
+          "oklch(30% 0.11 40)",
+          "oklch(38% 0.11 40)",
+          "oklch(47% 0.11 40)",
+          "oklch(57% 0.11 40)",
+          "oklch(68% 0.11 40)",
+          "oklch(79% 0.11 40)",
+          "oklch(89% 0.11 40)",
+          "oklch(95% 0.11 40)"
+        ]
+      },
+      "sunkiss": {
+        "role": "secondary",
+        "displayName": "Sunkiss",
+        "hex": "#e1b06e",
+        "purpose": "Target state. Closing ranks near the student rank.",
+        "canonical": "oklch(78% 0.11 80)",
+        "tonalRamp": [
+          "oklch(16% 0.11 80)",
+          "oklch(23% 0.11 80)",
+          "oklch(30% 0.11 80)",
+          "oklch(38% 0.11 80)",
+          "oklch(47% 0.11 80)",
+          "oklch(57% 0.11 80)",
+          "oklch(68% 0.11 80)",
+          "oklch(79% 0.11 80)",
+          "oklch(89% 0.11 80)",
+          "oklch(95% 0.11 80)"
+        ]
+      },
+      "sage": {
+        "role": "secondary",
+        "displayName": "Sage",
+        "hex": "#a3a473",
+        "purpose": "Safe state. Closing ranks well below the student rank.",
+        "canonical": "oklch(68% 0.06 110)",
+        "tonalRamp": [
+          "oklch(16% 0.06 110)",
+          "oklch(23% 0.06 110)",
+          "oklch(30% 0.06 110)",
+          "oklch(38% 0.06 110)",
+          "oklch(47% 0.06 110)",
+          "oklch(57% 0.06 110)",
+          "oklch(68% 0.06 110)",
+          "oklch(79% 0.06 110)",
+          "oklch(89% 0.06 110)",
+          "oklch(95% 0.06 110)"
+        ]
+      },
+      "tidal-dim": {
+        "role": "neutral",
+        "displayName": "Tidal Dim",
+        "hex": "#4b607c",
+        "purpose": "Neutral marker on the Rank Rail.",
+        "canonical": "oklch(42% 0.06 245)",
+        "tonalRamp": [
+          "oklch(16% 0.06 245)",
+          "oklch(23% 0.06 245)",
+          "oklch(30% 0.06 245)",
+          "oklch(38% 0.06 245)",
+          "oklch(47% 0.06 245)",
+          "oklch(57% 0.06 245)",
+          "oklch(68% 0.06 245)",
+          "oklch(79% 0.06 245)",
+          "oklch(89% 0.06 245)",
+          "oklch(95% 0.06 245)"
+        ]
+      },
+      "signal-coral": {
+        "role": "neutral",
+        "displayName": "Signal Coral",
+        "hex": "#e8704f",
+        "purpose": "Errors and destructive actions.",
+        "canonical": "oklch(68% 0.16 40)",
+        "tonalRamp": [
+          "oklch(16% 0.16 40)",
+          "oklch(23% 0.16 40)",
+          "oklch(30% 0.16 40)",
+          "oklch(38% 0.16 40)",
+          "oklch(47% 0.16 40)",
+          "oklch(57% 0.16 40)",
+          "oklch(68% 0.16 40)",
+          "oklch(79% 0.16 40)",
+          "oklch(89% 0.16 40)",
+          "oklch(95% 0.16 40)"
+        ]
+      },
+      "selection-wash": {
+        "role": "primary",
+        "displayName": "Selection Wash",
+        "hex": "#6a9fcc3d",
+        "purpose": "Tidal blue at low alpha. Selected state of segmented options and answer rows."
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "One serif statement per screen."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Interview questions and legal titles."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Institute names in the results table."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Long copy and legal prose."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "Table cells, counts, ranks. Tabular numerals."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels, buttons, nav, controls."
+      },
+      "folio": {
+        "displayName": "Folio",
+        "purpose": "Figure numbers, folios, axis labels in Departure Mono."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The only easing. All transitions use it."
+      },
+      {
+        "name": "t-fast",
+        "value": "120ms",
+        "purpose": "Hover and state transitions."
+      },
+      {
+        "name": "t-base",
+        "value": "160ms",
+        "purpose": "Entrances: modals, detail rows."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "md",
+        "value": "900px",
+        "purpose": "Table collapses to stacked rows; splits go single column; gutter grows to 40px."
+      },
+      {
+        "name": "sm",
+        "value": "480px",
+        "purpose": "Display steps down to 36px; detail list goes single column."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single filled action on a screen. Tidal blue ground, deep ink text.",
+      "html": "<button class=\"ds-btn-primary\">Build my index</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 20px;border:1px solid var(--accent);border-radius:0;background:var(--accent);color:var(--bg-deep);font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:background 120ms var(--ease-out)}.ds-btn-primary:hover{background:color-mix(in srgb,var(--accent) 84%,var(--text));border-color:color-mix(in srgb,var(--accent) 84%,var(--text))}.ds-btn-primary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Default bordered action. Transparent ground, hairline border.",
+      "html": "<button class=\"ds-btn-quiet\">Amend</button>",
+      "css": ".ds-btn-quiet{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 20px;border:1px solid var(--line-strong);border-radius:0;background:transparent;color:var(--text);font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:background 120ms var(--ease-out)}.ds-btn-quiet:hover{background:var(--panel-soft);border-color:var(--muted)}.ds-btn-quiet:focus-visible{outline:2px solid var(--accent);outline-offset:2px}"
+    },
+    {
+      "name": "Text Button",
+      "kind": "button",
+      "refersTo": "button-text",
+      "description": "Tertiary inline action. No border, underline on hover.",
+      "html": "<button class=\"ds-btn-text\">Skip this question</button>",
+      "css": ".ds-btn-text{display:inline-flex;align-items:center;min-height:32px;padding:0 4px;border:0;background:transparent;color:var(--copy);font-family:var(--mono);font-size:11px;letter-spacing:0.04em;cursor:pointer}.ds-btn-text:hover{color:var(--text);text-decoration:underline;text-underline-offset:4px}.ds-btn-text:focus-visible{outline:2px solid var(--accent);outline-offset:2px}"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Standard field. Slate panel ground, hairline border, focus shifts border to accent.",
+      "html": "<input class=\"ds-input\" placeholder=\"College or branch\" />",
+      "css": ".ds-input{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:0;background:var(--panel);color:var(--text);font-family:var(--mono);font-size:14px;box-sizing:border-box}.ds-input::placeholder{color:var(--muted);opacity:0.75}.ds-input:hover{border-color:var(--line-strong)}.ds-input:focus{border-color:var(--accent);outline:none}"
+    },
+    {
+      "name": "Rank Input",
+      "kind": "input",
+      "refersTo": "rank-input",
+      "description": "The one expressive control. Source Serif 4 at 48px in a 64px field, tabular numerals.",
+      "html": "<input class=\"ds-rank-input\" type=\"number\" value=\"5000\" />",
+      "css": ".ds-rank-input{width:100%;height:64px;padding:0 12px;border:1px solid var(--line);border-radius:0;background:var(--panel);color:var(--text);font-family:var(--serif);font-size:48px;line-height:1;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;appearance:textfield;box-sizing:border-box}.ds-rank-input:focus{border-color:var(--accent);outline:none}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "chip",
+      "refersTo": "segmented-option",
+      "description": "Mutually exclusive filter. Active option takes the selection wash and an inset accent underline.",
+      "html": "<div class=\"ds-segmented\"><button class=\"ds-segmented-option\">All</button><button class=\"ds-segmented-option is-active\">Safe</button><button class=\"ds-segmented-option\">Target</button><button class=\"ds-segmented-option\">Reach</button></div>",
+      "css": ".ds-segmented{display:inline-flex;width:100%;border:1px solid var(--line);border-radius:0;background:var(--panel);overflow:hidden}.ds-segmented-option{flex:1;min-height:44px;padding:0 12px;border:0;border-left:1px solid var(--line);background:transparent;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer}.ds-segmented-option:first-child{border-left:0}.ds-segmented-option:hover{background:var(--panel-soft);color:var(--text)}.ds-segmented-option.is-active{background:var(--selection);color:var(--text);box-shadow:inset 0 -2px 0 var(--accent)}"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Count or tag capsule. Transparent ground, hairline-strong border.",
+      "html": "<span class=\"ds-chip\">Institutes <b class=\"ds-chip-value\">79</b></span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid var(--line-strong);border-radius:0;background:transparent;color:var(--copy);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.08em}.ds-chip-value{font-variant-numeric:tabular-nums;color:var(--text)}"
+    },
+    {
+      "name": "Index Nav",
+      "kind": "nav",
+      "refersTo": "index-nav",
+      "description": "Step navigation in the top bar. Active step is a 2px accent bottom rule.",
+      "html": "<nav class=\"ds-nav\"><button class=\"ds-nav-item is-active\"><span class=\"ds-nav-num\">01</span>Profile</button><button class=\"ds-nav-item\"><span class=\"ds-nav-num\">02</span>Interview</button><button class=\"ds-nav-item\"><span class=\"ds-nav-num\">03</span>Index</button></nav>",
+      "css": ".ds-nav{display:flex;gap:20px}.ds-nav-item{display:inline-flex;align-items:baseline;gap:8px;padding:8px 0;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer}.ds-nav-item:hover{color:var(--text);border-bottom-color:var(--line-strong)}.ds-nav-item.is-active{color:var(--text);border-bottom-color:var(--accent)}.ds-nav-num{font-family:var(--accent-mono);font-size:10px;color:var(--muted)}.ds-nav-item.is-active .ds-nav-num{color:var(--accent)}"
+    },
+    {
+      "name": "Rank Rail Row",
+      "kind": "custom",
+      "refersTo": "rank-rail",
+      "description": "The signature component. Log-scale rail, student rank fixed at center, closing rank ticked left (reach) or right (safe).",
+      "html": "<div class=\"ds-rail\"><div class=\"ds-rail-track\"><span class=\"ds-rail-tick\"></span><span class=\"ds-rail-marker\" data-state=\"reach\"></span></div><span class=\"ds-rail-label\">Reach</span></div>",
+      "css": ".ds-rail{display:flex;align-items:center;gap:8px}.ds-rail-track{position:relative;flex:1;min-width:110px;height:22px}.ds-rail-track::before{content:'';position:absolute;top:10px;left:0;right:0;height:2px;background:var(--line)}.ds-rail-tick{position:absolute;top:4px;left:50%;width:2px;height:14px;background:var(--neutral-data)}.ds-rail-marker{position:absolute;top:3px;left:30%;width:2px;height:16px;background:var(--reach)}.ds-rail-marker::before{content:'';position:absolute;top:-3px;left:-2px;width:6px;height:6px;background:inherit;transform:rotate(45deg)}.ds-rail-label{min-width:46px;text-align:right;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)}"
+    },
+    {
+      "name": "Modal Card",
+      "kind": "card",
+      "refersTo": "modal-card",
+      "description": "Dialog surface. Ledger canvas ground, hairline-strong border, square corners.",
+      "html": "<div class=\"ds-modal\"><h2 class=\"ds-modal-title\">Demo access</h2><p class=\"ds-modal-copy\">Any email creates a local session.</p></div>",
+      "css": ".ds-modal{max-width:560px;padding:20px;border:1px solid var(--line-strong);border-radius:0;background:var(--bg-canvas);color:var(--copy);font-family:var(--mono);font-size:14px}.ds-modal-title{margin:0 0 12px;font-family:var(--serif);font-size:28px;line-height:1.15;font-weight:400;color:var(--text)}.ds-modal-copy{margin:0;line-height:1.55}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Cutoff Ledger",
+    "overview": [
+      "A printed JoSAA cutoff almanac crossed with a terminal. The page is a ledger that finds your line in it. It is not a dashboard of recommendation cards: no centered hero card, no card grid, no rounded shadows. Density is honest. A student under counselling pressure should scan a ruled table and find their rank in it faster than any chat UI would let them.",
+      "The world runs dark only. A deep ink navy ground, parchment text, terracotta and sage and sunkiss state ticks, tidal blue actions, 1px hairlines, and square corners everywhere. Source Serif 4 speaks in display sizes, Commit Mono carries everything operational, Departure Mono marks folios and axis labels. The signature element is the Rank Rail: a log-scale rail with the student rank fixed at center and each closing rank ticked left for reach or right for safe."
+    ],
+    "keyCharacteristics": [
+      "Dark only, deep ink ground, no light theme and no theme toggle.",
+      "Square corners everywhere. No border radius survives.",
+      "1px hairlines separate everything. No drop shadows at rest.",
+      "Serif for display, mono for everything operational.",
+      "Numbers are tabular and right-aligned in data columns.",
+      "Uppercase micro labels with 0.08em tracking, never a kicker above a heading.",
+      "Accent blue is rare: primary actions and the active step only."
+    ],
+    "rules": [
+      {
+        "name": "The One Blue Rule",
+        "body": "Tidal blue marks actions and the current step, nothing else. Data states speak in terracotta, sunkiss, and sage, not blue.",
+        "section": "colors"
+      },
+      {
+        "name": "The No New Hex Rule",
+        "body": "Every color in the UI resolves to a token in tokens.css. Screens add no hex values of their own.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Serif Statement Rule",
+        "body": "Serif appears in display sizes, headlines, institute names and the rank input only. If a piece of text is operational, it is mono.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Kicker Rule",
+        "body": "Never an eyebrow or running head above a heading. The heading carries its own weight.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Surfaces are flat. No shadows anywhere; depth is tonal layering plus hairlines. Focus rings are the only raised element.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep every screen dark. Deep Ink ground, no light variant, no toggle.",
+      "Do resolve every color from tokens.css. No new hex values in screen CSS.",
+      "Do use tabular numerals for every number that can change or be compared.",
+      "Do let hairlines do the separating. Rows, sections, toolbars: 1px rules.",
+      "Do keep serif for the one display statement per screen and institute names.",
+      "Do label missing data as a plain dash, never \"N/A\".",
+      "Do keep the accent blue rare: primary actions, active step, focus."
+    ],
+    "donts": [
+      "Don't use border radius anywhere. The system is square.",
+      "Don't add shadows, glows, or blurred backdrops.",
+      "Don't put a kicker or eyebrow above a heading.",
+      "Don't build card grids of equal tiles. The results screen is a ruled table.",
+      "Don't use color alone to carry meaning. State ticks also carry text labels.",
+      "Don't round inputs or buttons just a little. 0 means 0."
+    ]
+  }
+}
