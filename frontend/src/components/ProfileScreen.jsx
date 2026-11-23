@@ -54,7 +54,7 @@ const describedBy = (id, error, hint) =>
   [error ? `${id}-error` : null, hint ? `${id}-hint` : null].filter(Boolean).join(' ') ||
   undefined;
 
-export default function ProfileScreen({ initialValues = null, onSubmit, loading = false, onOpenStats }) {
+export default function ProfileScreen({ initialValues = null, onSubmit, loading = false }) {
   const seed = initialValues || {};
 
   const [rank, setRank] = useState(() => (seed.rank ? String(seed.rank) : ''));
@@ -158,10 +158,6 @@ export default function ProfileScreen({ initialValues = null, onSubmit, loading 
               Find where your rank lands.
             </h1>
           </div>
-
-          <p className="lede profile__lede">
-            Match your profile against every indexed branch, then read the closing ranks in order.
-          </p>
 
           <form className="profile__fields" onSubmit={handleSubmit} noValidate>
             <Field id="rank" label="All India Rank (CRL)" hint={RANK_HINT} error={errors.rank}>
@@ -309,53 +305,12 @@ export default function ProfileScreen({ initialValues = null, onSubmit, loading 
               <span className="profile__actions-note">No account required.</span>
             </div>
           </form>
-
-          <section className="profile__methods" aria-labelledby="method-title">
-            <h2 className="sr-only" id="method-title">
-              How the index is built
-            </h2>
-            <ol className="profile__method-list">
-              <li className="profile__method">
-                <span className="profile__method-num" aria-hidden="true">
-                  01
-                </span>
-                <div>
-                  <h3 className="profile__method-title">Eligibility</h3>
-                  <p>Filters every branch by rank, category and home-state quota.</p>
-                </div>
-              </li>
-              <li className="profile__method">
-                <span className="profile__method-num" aria-hidden="true">
-                  02
-                </span>
-                <div>
-                  <h3 className="profile__method-title">Fit</h3>
-                  <p>Ranks survivors by cutoff distance, placement, campus and preferences.</p>
-                </div>
-              </li>
-              <li className="profile__method">
-                <span className="profile__method-num" aria-hidden="true">
-                  03
-                </span>
-                <div>
-                  <h3 className="profile__method-title">Choice list</h3>
-                  <p>Writes a CSV you can take to JoSAA.</p>
-                </div>
-              </li>
-            </ol>
-            <p className="profile__provenance">
-              Data: JoSAA 2024 Round 5 and 2025. Always check the official portal.
-            </p>
-          </section>
         </div>
 
         <aside className="profile__aside">
           <figure className="panel--figure specimen">
             <div className="specimen__head">
               <span className="mono-label">Rank specimen</span>
-              <button type="button" className="btn btn--text btn--sm" onClick={onOpenStats}>
-                See live statistics
-              </button>
             </div>
 
             <div className="specimen__rail">

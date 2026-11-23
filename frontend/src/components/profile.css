@@ -24,11 +24,6 @@
   min-width: 0;
 }
 
-.profile__lede {
-  max-width: 46ch;
-  margin-top: var(--space-3);
-}
-
 .profile__fields {
   display: flex;
   flex-direction: column;
@@ -137,61 +132,6 @@
 }
 
 .profile__actions-note {
-  font-family: var(--mono);
-  font-size: var(--fs-label);
-  line-height: var(--lh-label);
-  letter-spacing: 0.04em;
-  color: var(--muted);
-}
-
-.profile__methods {
-  margin-top: var(--space-6);
-}
-
-.profile__method-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-bottom: 1px solid var(--line);
-}
-
-.profile__method {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
-  gap: var(--space-4);
-  padding: var(--space-3) 0;
-  border-top: 1px solid var(--line);
-}
-
-.profile__method-num {
-  padding-top: 3px;
-  font-family: var(--accent-mono);
-  font-size: var(--fs-label);
-  line-height: var(--lh-label);
-  letter-spacing: 0.04em;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.profile__method-title {
-  margin: 0 0 var(--space-1);
-  font-family: var(--serif);
-  font-size: var(--fs-institute);
-  line-height: var(--lh-institute);
-  font-weight: 500;
-}
-
-.profile__method p {
-  max-width: 60ch;
-  margin: 0;
-  font-family: var(--mono);
-  font-size: var(--fs-data);
-  line-height: var(--lh-data);
-  color: var(--muted);
-}
-
-.profile__provenance {
-  margin-top: var(--space-3);
   font-family: var(--mono);
   font-size: var(--fs-label);
   line-height: var(--lh-label);
@@ -313,10 +253,5 @@
 
   .profile__submit {
     width: 100%;
-  }
-
-  .profile__method {
-    grid-template-columns: 32px minmax(0, 1fr);
-    gap: var(--space-3);
   }
 }

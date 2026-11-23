@@ -228,7 +228,6 @@ export default function App() {
         initialValues={userInputs}
         onSubmit={handlePredict}
         loading={loading}
-        onOpenStats={openStats}
       />
     );
   };
@@ -275,7 +274,8 @@ export default function App() {
             onClick={openStats}
           >
             Stats
-          </button>          {user ? (
+          </button>
+          {user ? (
             <div className="user-menu">
               <span className="avatar" aria-hidden="true">
                 {initial}
