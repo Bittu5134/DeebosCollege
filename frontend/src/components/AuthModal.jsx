@@ -42,8 +42,7 @@ function AuthForm({ onClose, onSuccess }) {
   return (
     <form className="auth-form" onSubmit={handleSubmit} noValidate>
       <p className="auth-note">
-        Email only. This is a course-project demo, so any email creates a local session. There is
-        no password and no identity provider.
+        Demo access: any email creates a local session. No password, no identity provider.
       </p>
 
       <Field id="auth-name" label="Name (optional)" hint="Leave blank to sign in as Student.">
