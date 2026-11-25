@@ -20,6 +20,7 @@ from .llm import extract_preferences, generate_followup_questions, generate_mult
 from .models import College, Branch, UserSearch
 from .recommender import recommend
 from .schemas import RecommendationRequest, FollowupRequest, LoginRequest
+from .reviews.routes import router as reviews_router
 
 logger = logging.getLogger(__name__)
 
@@ -210,6 +211,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(reviews_router)
 
 
 @app.post("/auth/login")

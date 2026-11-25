@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Download } from 'lucide-react';
+import { Download, Sparkles, Building2, Trophy, Rocket, Compass, ChevronDown, ChevronUp } from 'lucide-react';
 import api, { getBackendCategory } from '../api';
 import Field from './ui/Field';
 import RankRail from './ui/RankRail';
@@ -76,6 +76,14 @@ const formatList = (value) => {
   }
   if (isMissing(value)) return '—';
   return String(value);
+};
+
+const toList = (value) => {
+  if (Array.isArray(value)) {
+    return [...new Set(value.filter(Boolean))];
+  }
+  if (isMissing(value)) return [];
+  return [String(value)];
 };
 
 const categoryLabel = (category) => {
@@ -726,6 +734,28 @@ function FragmentRow({
 }) {
   const item = row.item;
   const state = row.state;
+  const studentClubsList = toList(item.student_clubs);
+  const sportsList = toList(item.sports_infrastructure);
+  const startupList = toList(item.notable_startups);
+  const hasCampusData =
+    studentClubsList.length > 0 ||
+    sportsList.length > 0 ||
+    startupList.length > 0 ||
+    !isMissing(item.incubation_center_name);
+
+  // Compute a campus vitality score out of 100 based on extracurricular diversity and startup ecosystem
+  const campusScore = Math.min(
+    98,
+    Math.max(
+      45,
+      Math.round(
+        (studentClubsList.length ? Math.min(studentClubsList.length * 4.5, 35) : 15) +
+        (sportsList.length ? Math.min(sportsList.length * 5, 25) : 10) +
+        (startupList.length ? Math.min(startupList.length * 5, 25) : 10) +
+        (!isMissing(item.incubation_center_name) ? 15 : 5)
+      )
+    )
+  );
 
   const handleKeyDown = (event) => {
     if (event.target !== event.currentTarget) return;
@@ -781,14 +811,15 @@ function FragmentRow({
         <td className="results-cell results-cell--details">
           <button
             type="button"
-            className="btn btn--text btn--sm"
+            className="btn btn--text btn--sm results-expand-btn"
             aria-expanded={open}
             onClick={(event) => {
               event.stopPropagation();
               onToggle(rowKeyValue);
             }}
           >
-            {open ? 'Close' : 'Details'}
+            <span>{open ? 'Hide' : 'Details'}</span>
+            {open ? <ChevronUp className="results-expand-icon" /> : <ChevronDown className="results-expand-icon" />}
           </button>
         </td>
       </tr>
@@ -797,54 +828,134 @@ function FragmentRow({
         <tr className="results-detail-row">
           <td colSpan={showMatch ? 9 : 8}>
             <div className="results-detail">
-              <dl className="results-detail__list">
-                <div className="results-detail__item">
-                  <dt>2024 closing rank</dt>
-                  <dd className="tabular">{formatRank(item.closing_rank_2024)}</dd>
+              {/* Admissions & Compensation stats bar */}
+              <div className="results-detail__stats-bar">
+                <div className="results-stat-card">
+                  <span className="results-stat-card__label">2024 Closing</span>
+                  <span className="results-stat-card__value tabular">{formatRank(item.closing_rank_2024)}</span>
                 </div>
-                <div className="results-detail__item">
-                  <dt>2025 closing rank</dt>
-                  <dd className="tabular">{formatRank(item.closing_rank_2025)}</dd>
+                <div className="results-stat-card">
+                  <span className="results-stat-card__label">2025 Closing</span>
+                  <span className="results-stat-card__value tabular">{formatRank(item.closing_rank_2025)}</span>
                 </div>
-                <div className="results-detail__item">
-                  <dt>Median CTC</dt>
-                  <dd className="tabular">{formatCtc(item.median_ctc)}</dd>
+                <div className="results-stat-card">
+                  <span className="results-stat-card__label">Median CTC</span>
+                  <span className="results-stat-card__value tabular">{formatCtc(item.median_ctc)}</span>
                 </div>
-                <div className="results-detail__item">
-                  <dt>Category</dt>
-                  <dd>{categoryLabel(item.category || inputs.category)}</dd>
-                </div>
-                <div className="results-detail__item">
-                  <dt>Exam</dt>
-                  <dd>{rowExam}</dd>
-                </div>
-                <div className="results-detail__item">
-                  <dt>Student clubs</dt>
-                  <dd>{formatList(item.student_clubs)}</dd>
-                </div>
-                <div className="results-detail__item">
-                  <dt>Sports</dt>
-                  <dd>{formatList(item.sports_infrastructure)}</dd>
-                </div>
-                <div className="results-detail__item">
-                  <dt>Incubation centre</dt>
-                  <dd>{formatList(item.incubation_center_name)}</dd>
-                </div>
-                <div className="results-detail__item">
-                  <dt>Notable startups</dt>
-                  <dd>{formatList(item.notable_startups)}</dd>
+                <div className="results-stat-card">
+                  <span className="results-stat-card__label">Category / Exam</span>
+                  <span className="results-stat-card__value results-stat-card__value--subtle">
+                    {categoryLabel(item.category || inputs.category)} · {rowExam}
+                  </span>
                 </div>
                 {showMatch ? (
-                  <div className="results-detail__item">
-                    <dt>Similarity score</dt>
-                    <dd className="tabular">{formatMatch(item.similarity_score)}</dd>
+                  <div className="results-stat-card results-stat-card--highlight">
+                    <span className="results-stat-card__label">Similarity Match</span>
+                    <span className="results-stat-card__value tabular">{formatMatch(item.similarity_score)}</span>
                   </div>
                 ) : null}
-              </dl>
+              </div>
+
+              {/* Campus Life & Ecosystem Portfolio */}
+              <div className="campus-portfolio">
+                <div className="campus-portfolio__header">
+                  <div className="campus-portfolio__title-group">
+                    <div className="campus-portfolio__glow-dot" aria-hidden="true" />
+                    <span className="campus-portfolio__title">Campus Life & Ecosystem Portfolio</span>
+                  </div>
+                  <div className="campus-portfolio__vitality">
+                    <span className="campus-portfolio__vitality-label">Ecosystem Vitality</span>
+                    <div className="campus-portfolio__meter-track">
+                      <div
+                        className="campus-portfolio__meter-fill"
+                        style={{ width: `${campusScore}%` }}
+                      />
+                    </div>
+                    <span className="campus-portfolio__vitality-score tabular">{campusScore}</span>
+                  </div>
+                </div>
+
+                <div className="campus-portfolio__grid">
+                  {/* Student Clubs Card */}
+                  <div className="campus-card">
+                    <div className="campus-card__head">
+                      <Compass className="campus-card__icon campus-card__icon--blue" size={14} />
+                      <span className="campus-card__label">Active Student Clubs</span>
+                      <span className="campus-card__count">{studentClubsList.length}</span>
+                    </div>
+                    <div className="campus-card__body">
+                      {studentClubsList.length ? (
+                        <div className="campus-tags">
+                          {studentClubsList.map((club, idx) => (
+                            <span key={idx} className="campus-tag campus-tag--club">
+                              {club}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="campus-empty-text">No recorded club data</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Sports & Recreation Card */}
+                  <div className="campus-card">
+                    <div className="campus-card__head">
+                      <Trophy className="campus-card__icon campus-card__icon--amber" size={14} />
+                      <span className="campus-card__label">Sports & Infrastructure</span>
+                      <span className="campus-card__count">{sportsList.length}</span>
+                    </div>
+                    <div className="campus-card__body">
+                      {sportsList.length ? (
+                        <div className="campus-tags">
+                          {sportsList.map((sport, idx) => (
+                            <span key={idx} className="campus-tag campus-tag--sports">
+                              {sport}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="campus-empty-text">Standard sports facilities</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Incubation & Startups Card */}
+                  <div className="campus-card">
+                    <div className="campus-card__head">
+                      <Rocket className="campus-card__icon campus-card__icon--emerald" size={14} />
+                      <span className="campus-card__label">Innovation & Startups</span>
+                      <span className="campus-card__count">{startupList.length}</span>
+                    </div>
+                    <div className="campus-card__body">
+                      {!isMissing(item.incubation_center_name) ? (
+                        <div className="campus-incubator">
+                          <span className="campus-incubator__badge">Hub</span>
+                          <span className="campus-incubator__name">{item.incubation_center_name}</span>
+                        </div>
+                      ) : null}
+                      {startupList.length ? (
+                        <div className="campus-tags">
+                          {startupList.map((startup, idx) => (
+                            <span key={idx} className="campus-tag campus-tag--startup">
+                              {startup}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="campus-empty-text">Ecosystem active via research cells</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {explanation ? (
                 <div className="results-detail__note">
-                  <span className="mono-label">Index note</span>
+                  <div className="results-detail__note-head">
+                    <Sparkles className="results-detail__note-icon" size={13} />
+                    <span className="mono-label">Recommendation Assessment</span>
+                  </div>
                   <p>{explanation}</p>
                 </div>
               ) : null}

@@ -100,6 +100,44 @@ export function branches() {
   return request('/branches');
 }
 
+export function getReviewTopics() {
+  return request('/reviews/topics');
+}
+
+export function listCollegesWithReviews(params = {}) {
+  const query = new URLSearchParams();
+  if (params.topic) query.set('topic', params.topic);
+  if (params.sort_by) query.set('sort_by', params.sort_by);
+  const qStr = query.toString();
+  return request(`/reviews/colleges${qStr ? `?${qStr}` : ''}`);
+}
+
+export function getCollegeReviews(collegeIdentifier, params = {}) {
+  const query = new URLSearchParams();
+  if (params.topic) query.set('topic', params.topic);
+  if (params.sort_by) query.set('sort_by', params.sort_by);
+  const qStr = query.toString();
+  return request(`/reviews/college/${encodeURIComponent(collegeIdentifier)}${qStr ? `?${qStr}` : ''}`);
+}
+
+export function submitReview(payload) {
+  return request('/reviews/submit', {
+    method: 'POST',
+    body: payload,
+  });
+}
+
+export function voteReviewHelpful(reviewId, userIdentifier) {
+  return request(`/reviews/vote/${reviewId}`, {
+    method: 'POST',
+    body: { user_identifier: userIdentifier },
+  });
+}
+
+export function compareColleges(collegeIdA, collegeIdB) {
+  return request(`/reviews/compare?college_id_a=${encodeURIComponent(collegeIdA)}&college_id_b=${encodeURIComponent(collegeIdB)}`);
+}
+
 const api = {
   generateQuestions,
   recommend,
@@ -108,6 +146,12 @@ const api = {
   statistics,
   colleges,
   branches,
+  getReviewTopics,
+  listCollegesWithReviews,
+  getCollegeReviews,
+  submitReview,
+  voteReviewHelpful,
+  compareColleges,
 };
 
 export default api;
