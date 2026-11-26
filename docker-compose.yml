@@ -43,6 +43,7 @@ services:
       ALLOWED_ORIGINS: http://localhost:8080
     volumes:
       - ./data:/app/data
+      - ./www.shiksha.com.har:/app/www.shiksha.com.har:ro
     ports:
       - "8000:8000"
     healthcheck:
