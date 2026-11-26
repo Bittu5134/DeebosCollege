@@ -1,0 +1,91 @@
+Deebo's College - AI-assisted development prompt log
+=====================================================
+Project: Deebo's College (JEE / JoSAA college predictor)
+Tool: Claude Code (AI coding assistant)
+
+Part A lists the prompts actually used in the AI-assisted improvement session
+(lightly edited for spelling and clarity, in chronological order).
+Part B lists follow-up prompts planned for the next iteration; they were not run yet.
+
+
+PART A - PROMPTS USED
+---------------------
+
+Backend restoration
+1.  The backend in the old project archive (college_predictor-main.zip) should behave like this
+    old version. Compare it with the current backend/app package and tell me what differs.
+2.  Port the old backend code (crud, search_vector_db, llm_layer, schemas, database) into the
+    current backend/app layout, only fixing imports and data paths so Docker and the frontend
+    keep working.
+3.  Keep the Student Reviews API, the OpenAI-compatible LLM provider, the /health endpoint and
+    the scraper scripts while restoring the old logic.
+
+Docker and deployment
+4.  How do I install and use Docker to run this project on my machine? Optimise and fix the
+    Docker setup and make the images lean.
+5.  Remove build tools the backend image does not need, replace the curl healthcheck, and keep
+    the CPU-only PyTorch install and BuildKit caching.
+6.  Docker is installed and hello-world works. Walk me through building the stack and loading
+    the college data into Postgres and Qdrant.
+7.  The containers are not running. Diagnose why `docker compose ps` is empty and how to start
+    the stack.
+8.  How do I run the project now that the data is loaded? Is it already running, and how do I
+    access it?
+9.  How do I update my Docker build after code changes without losing data?
+
+Branding
+10. Rebrand the entire project to "Deebo's College",
+    including internal identifiers like localStorage keys and the alpha_id user field, without
+    breaking existing database data.
+
+Improvements and reliability
+11. What improvements would you add to this frontend and project? Give me a prioritised list.
+12. Load the data automatically on first start so nobody has to run the ingest and embedding
+    scripts by hand.
+13. Make the API fall back gracefully when the LLM fails or no API key is set, instead of
+    returning HTTP 500 errors.
+14. Speed up recommendations by caching the static cutoff lookups.
+15. Add frontend conveniences: remember the last inputs, add a shareable results link, and show
+    skeleton loading instead of plain loading text.
+16. Clean up dead modules and stray files, then commit everything.
+17. Is the student review system still present after these changes?
+
+Proposal compliance
+18. Compare the project against our proposal PDF and tell me whether every feature described
+    there is implemented.
+19. Add the missing features from the proposal that are reasonable (plain-text corpus
+    generation script, default Gemini model) and skip the rest.
+20. Merge all the work into the main branch.
+
+Frontend redesign
+21. Redo the frontend landing page in the style of this reference: grid background, large
+    headline on the left, form card on the right.
+22. The bright colours are painful to the eyes. Switch to a dark theme based on our design
+    system, fix the page that always scrolls, and critique and fix the frontend.
+23. Why is monospace used randomly? Use one consistent font.
+24. The layout is broken (screenshot attached): the form sits below the hero and the title
+    wraps. Fix the grid placement.
+25. Text sizes are out of proportion and nothing is aligned; the form is compressed and hides
+    the Male/Female options. Fix the entire layout.
+26. The hero takes too much space and the form card is too tall. Give the card more horizontal
+    space.
+27. Make every page of the frontend polished. Check each screen (profile, follow-up questions,
+    results, reviews) on desktop and mobile and fix what you find.
+28. Many elements are different sizes with no consistency. Deslop the design: one type scale,
+    one card style, one button system across all pages.
+29. Remove the "JoSAA index" label, the numbers next to the navigation headers, and any other
+    clutter you think should go.
+30. How do the follow-up questions work, and can they be made faster?
+
+
+PART B - PLANNED FOLLOW-UP PROMPTS (not yet run)
+-----------------------------------------------
+
+31. Replace AI-generated follow-up questions with a fixed question set when the LLM is slow,
+    so the interview loads instantly.
+32. Rewrite the follow-up question prompt in a neutral, professional counsellor tone.
+33. Lock down CORS to the deployed frontend origin and require SESSION_SECRET in production.
+34. Add automated API tests for /predict, /recommend and /export-choices using a seeded test
+    database.
+35. Reduce the length of the mobile results list with pagination or a "back to filters" jump.
+36. Audit the results screen colours for WCAG AA contrast in the dark theme.
