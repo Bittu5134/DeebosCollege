@@ -31,7 +31,7 @@ ALLOWED_ORIGINS = [
 ]
 
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini").strip().lower()
-LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.5-flash")
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-3.5-flash")
 USE_VERTEX = os.getenv("USE_VERTEX", "false").lower() == "true"
 GCP_PROJECT = os.getenv("GCP_PROJECT")
 GCP_LOCATION = os.getenv("GCP_LOCATION", "us-central1")
