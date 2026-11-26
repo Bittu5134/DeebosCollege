@@ -253,3 +253,61 @@ Example:
     except Exception as e:
         print(f"Error generating multiple explanations: {e}")
         return {}
+
+def extract_profile_and_questions(user_text: str, home_state: str) -> dict:
+    """One LLM round trip: extract the preference profile AND write follow-up questions."""
+    prompt = f"""
+You are a college counselor and recommendation assistant.
+
+Student home state:
+{home_state}
+
+Student preferences:
+{user_text}
+
+Do TWO things and return ONLY valid JSON of this shape:
+
+{{
+  "profile": {{
+    "preferred_states": [],
+    "startup_culture": false,
+    "coding_culture": false,
+    "research": false,
+    "placements": false,
+    "campus_life": false,
+    "hostel_quality": false,
+    "sports": false,
+    "extra_curriculars": false,
+    "infrastructure": false,
+    "diversity": false,
+    "location_proximity": false,
+    "branch_over_college": false,
+    "vector_query": ""
+  }},
+  "questions": [
+    {{"field": "research", "question": "...", "yes_title": "...", "yes_desc": "...", "no_title": "...", "no_desc": "..."}}
+  ]
+}}
+
+PROFILE RULES:
+1. Infer nearby states if the student prefers a college near home.
+2. vector_query must contain ONLY keywords and concepts, never sentences
+   (good: "startup ecosystem entrepreneurship incubation center coding culture hackathons").
+3. Set a boolean to true ONLY if it is explicitly mentioned or directly requested. Otherwise false. Do not infer.
+4. If the student names a specific branch group (e.g. "circuital branches", "cs only"), do NOT add keywords
+   from unrelated branch groups to vector_query.
+
+QUESTION RULES:
+5. Generate between 5 and 10 follow-up questions, ONLY about profile fields that are still false/empty.
+6. Allowed fields: coding_culture, startup_culture, research, placements, campus_life, hostel_quality, sports,
+   extra_curriculars, infrastructure, diversity, location_proximity, branch_over_college
+   (branch_over_college = prioritises branch choice over college brand).
+7. Be a bit love flirtatious with emojis, use words like (darling, baby) but don't overuse them.
+8. For each question give custom yes_title/yes_desc (student cares, field becomes true) and
+   no_title/no_desc (student does not prioritise it, field stays false).
+"""
+    text = extract_json_from_text(_generate(prompt))
+    data = json.loads(text)
+    if not isinstance(data, dict) or "profile" not in data or "questions" not in data:
+        raise ValueError("Combined LLM response missing profile/questions")
+    return data

@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 from . import crud
 from .config import SESSION_SECRET, DATA_DIR
 from .database import Base, engine, get_db
-from .llm import extract_preferences, generate_followup_questions, generate_multiple_explanations
+from .llm import extract_preferences, generate_followup_questions, generate_multiple_explanations, extract_profile_and_questions
 from .models import College, Branch, UserSearch
 from .recommender import recommend
 from .schemas import RecommendationRequest, FollowupRequest
@@ -544,6 +544,12 @@ def generate_questions(request: FollowupRequest, authorization: str = Header(Non
             "profile": blank_profile,
             "questions": questions
         }
+    # One LLM round trip instead of two; fall back to the two-call path if it fails.
+    try:
+        combined = extract_profile_and_questions(request.query, request.homestate)
+        return {"profile": combined["profile"], "questions": combined["questions"]}
+    except Exception as e:
+        logger.error("Combined profile+questions call failed, using two calls: %s", e)
     profile = extract_preferences(request.query, request.homestate)
     questions = generate_followup_questions(profile)
     return {
