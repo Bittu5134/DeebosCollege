@@ -103,3 +103,51 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 @keyframes sk { to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .skeleton__bar { animation: none; } }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---- Layout pass: one container, one type scale, no shouty labels ---- */
+:root { --max-width: 1200px; --gutter: 24px; }
+.topbar {
+  padding-inline: max(var(--gutter), calc((100% - var(--max-width)) / 2 + var(--gutter))) !important;
+  align-items: center !important; gap: 24px;
+}
+.main, .colophon { max-width: var(--max-width) !important; }
+.colophon { align-items: center !important; font-size: 13px; }
+
+/* Sentence case + normal tracking everywhere (old design used tracked caps) */
+*, *::before, *::after { text-transform: none !important; letter-spacing: normal !important; }
+.hero__title { letter-spacing: -0.02em !important; }
+
+/* Type scale */
+body { font-size: 15px; line-height: 1.5; }
+.wordmark { font-size: 17px; font-weight: 700; }
+.index-nav__item, .topbar .btn { font-size: 14px; font-weight: 500; }
+.field label, .field__label, .profile__form label, .mono-label { font-size: 13px; font-weight: 500; color: var(--copy); }
+.field__hint, .profile__actions-note, .profile__rank-side { font-size: 12.5px; color: var(--muted); }
+.btn { font-size: 15px; font-weight: 600; }
+
+/* Profile: hero and card share a top line */
+.profile__grid { align-items: start !important; padding-block: 56px 40px; }
+.hero { padding-top: 8px; }
+.hero__title { font-size: clamp(32px, 4.2vw, 52px); margin-bottom: 16px; }
+.hero__copy { font-size: 16px; }
+
+/* Form card: 2-column rows so nothing gets squashed */
+.profile__fields { display: flex; flex-direction: column; gap: 18px; }
+.profile__row { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 16px !important; }
+.profile__row .field--state { grid-column: 1 / -1; }
+.profile__form input, .profile__form select { height: 42px; padding-inline: 12px; font-size: 15px; width: 100%; }
+.profile__form textarea { padding: 10px 12px; font-size: 15px; width: 100%; }
+.profile__rank-row { display: flex; align-items: center; gap: 12px; }
+.profile__rank-row input { font-size: 18px !important; height: 44px; flex: 1; }
+.profile__form [role="radiogroup"], .profile__form .segmented { display: flex; height: 42px; }
+.profile__form [role="radiogroup"] > *, .profile__form .segmented > * {
+  flex: 1; min-width: 0; font-size: 14px; white-space: nowrap; overflow: visible;
+}
+.profile__submit { height: 46px; }
+.profile__actions { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.profile__actions-note { text-align: center; }
+
+@media (max-width: 520px) {
+  .profile__row { grid-template-columns: 1fr !important; }
+  .profile__form { padding: 18px; }
+}
