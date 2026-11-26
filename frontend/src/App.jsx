@@ -48,7 +48,7 @@ const readUser = () => {
 
 const STEPS = [
 	{ key: "profile", num: "01", label: "Profile", view: "form" },
-	{ key: "index", num: "02", label: "Index", view: "results" },
+	{ key: "index", num: "02", label: "Results", view: "results" },
 	{ key: "reviews", num: "03", label: "Student Reviews", view: "reviews" },
 ];
 
@@ -315,7 +315,6 @@ export default function App() {
 					<BrandMark />
 					<span className="wordmark">
 						Deebo's College
-						<span className="wordmark__sub">JoSAA index</span>
 					</span>
 				</button>
 
@@ -331,7 +330,6 @@ export default function App() {
 								disabled={!stepAvailability[step.key]}
 								aria-current={active ? "step" : undefined}
 							>
-								<span className="index-nav__num">{step.num}</span>
 								{step.label}
 							</button>
 						);
@@ -392,9 +390,11 @@ export default function App() {
 			) : null}
 
 			<main className="main">
-				{loading ? (
+				{loading && view !== "reviews" ? (
 					<div className="loading-screen skeleton" aria-busy="true">
-						<span className="sr-only">Matching your rank against the index...</span>
+						<p className="skeleton__msg" role="status">
+							Reading your preferences and preparing follow-up questions. This can take up to 30 seconds.
+						</p>
 						{Array.from({ length: 6 }).map((_, i) => (
 							<div className="skeleton__row" key={i} aria-hidden="true">
 								<span className="skeleton__bar skeleton__bar--wide" />

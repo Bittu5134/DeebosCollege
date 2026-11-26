@@ -306,7 +306,7 @@ export default function ProfileScreen({ initialValues = null, onSubmit, loading 
 
         <aside className="profile__aside hero">
           <h1 className="hero__title" id="profile-title">
-            JEE College<br />Predictor 2026 (JoSAA)
+            JEE College Predictor 2026 (JoSAA)
           </h1>
           <p className="hero__copy">
             Predict your admission chances into IITs, NITs, IIITs &amp; top Govt B.Tech colleges

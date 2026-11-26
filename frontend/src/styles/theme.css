@@ -178,3 +178,69 @@ body { font-size: 15px; line-height: 1.5; }
 @media (max-width: 640px) {
   .profile__row { grid-template-columns: 1fr !important; }
 }
+
+/* ---- Loading, footer ---- */
+.loading-screen.skeleton { max-width: 960px !important; min-height: 0 !important; width: min(960px, 100%); }
+.skeleton__bar { display: block; }
+.skeleton__msg { margin: 0 0 8px; color: var(--copy); font-size: 14px; }
+.colophon .btn, .colophon__links .btn { font-size: 13px !important; font-weight: 400 !important; color: var(--muted) !important; padding: 4px 8px; }
+.colophon .btn:hover { color: var(--text) !important; }
+.colophon__links { gap: 8px; }
+
+/* ===== Consistency system: every screen uses the same scale ===== */
+:root {
+  --fs-display: 32px; --lh-display: 1.2;
+  --fs-body: 15px; --fs-compact: 14px; --fs-data: 14px; --fs-label: 13px; --fs-institute: 16px;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px;
+}
+/* Same width + card for every screen (reviews was bare, interview was a card) */
+.main > .screen, .main > .reviews-screen, .main > section {
+  width: 100%; max-width: var(--max-width); margin-inline: auto;
+}
+.main > .reviews-screen { background: var(--bg-canvas); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgba(0,0,0,.35); padding: 24px; margin-block: 24px; }
+.main > .screen:not(.profile) { padding: 28px 32px; }
+
+/* Headings: one family, one weight, one scale */
+h1, h2, h3, .display, .interview-question, .reviews-header__title, .screen-head h1 { font-family: var(--sans); color: var(--text); }
+.interview-question, .reviews-header__title, .screen-head h1, .results-profile h1, .results-profile__main h1 {
+  font-size: 26px !important; font-weight: 700 !important; line-height: 1.3 !important; max-width: 40ch !important;
+}
+h2, .interview__aside h2, .interview-summary h2 { font-size: 18px; font-weight: 650; }
+h3, .topic-metric-card__title, .review-author-name, .results-institute { font-size: 15px; font-weight: 600; }
+.topic-metric-card__title { text-transform: capitalize !important; }
+
+/* Small text floor: nothing below 12.5px */
+.interview-progress__meta, .interview-keys, .interview-keys *, .results-cell__label, .results-stat-card__label,
+.review-role-badge, .review-topic-tag, .review-provenance-tag, .reviews-pill, .chip, .mono-label,
+.topic-metric-card small, .results-detail__note, .results-toolbar__meta, .review-card__footer {
+  font-size: 12.5px !important;
+}
+.interview-step, .review-card__text, .results-note__text { font-size: 15px; line-height: 1.6; }
+
+/* Buttons: one primary, one secondary, one text style */
+.btn { border-radius: var(--radius-sm); min-height: 38px; padding-inline: 16px; font-size: 14px !important; font-weight: 600; }
+.btn--sm { min-height: 32px; padding-inline: 12px; font-size: 13.5px !important; }
+.btn--ghost, .btn--secondary, .review-vote-btn {
+  background: transparent; border: 1px solid var(--line-strong) !important; color: var(--text) !important;
+}
+.btn--ghost:hover, .btn--secondary:hover, .review-vote-btn:hover { background: var(--panel-soft); }
+.btn--text { color: var(--copy) !important; font-weight: 500; border: 0; background: none; }
+.btn--text:hover { color: var(--text) !important; }
+.interview-footer { display: flex; gap: 8px; border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; }
+
+/* Inputs: same height everywhere */
+.main select, .main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), .reviews-select {
+  min-height: 40px; border-radius: var(--radius-sm); font-size: 14px;
+}
+/* Cards inside screens share one look */
+.topic-metric-card, .review-card, .results-stat-card, .results-detail, .stats-section {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: none;
+}
+
+/* ---- Decluttering: row numbers, keyboard hints ---- */
+.results-col--folio, .results-cell--folio, .results-note__folio, .interview-keys { display: none !important; }
+.interview-progress__meta { color: var(--muted); }
+@media (max-width: 700px) {
+  .index-nav { width: 100%; border-top: 1px solid var(--line); }
+}
