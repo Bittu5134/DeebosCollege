@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
 import Field from './ui/Field';
-import RankRail from './ui/RankRail';
 import './profile.css';
 
 const INDIAN_STATES = [
@@ -154,9 +153,7 @@ export default function ProfileScreen({ initialValues = null, onSubmit, loading 
       <div className="profile__grid">
         <div className="profile__form">
           <div className="profile__head">
-            <h1 className="display profile__title" id="profile-title">
-              Find where your rank lands.
-            </h1>
+            <h2 className="profile__title">Enter details to predict college</h2>
           </div>
 
           <form className="profile__fields" onSubmit={handleSubmit} noValidate>
@@ -294,7 +291,7 @@ export default function ProfileScreen({ initialValues = null, onSubmit, loading 
                 aria-busy={loading ? 'true' : undefined}
               >
                 <span className="btn__label">
-                  {loading ? 'Building your index...' : 'Build my index'}
+                  {loading ? 'Predicting...' : 'Predict My College'}
                 </span>
                 {loading ? null : (
                   <span aria-hidden="true" className="profile__submit-arrow">
@@ -307,48 +304,22 @@ export default function ProfileScreen({ initialValues = null, onSubmit, loading 
           </form>
         </div>
 
-        <aside className="profile__aside">
-          <figure className="panel--figure specimen">
-            <div className="specimen__head">
-              <span className="mono-label">Rank specimen</span>
-            </div>
-
-            <div className="specimen__rail">
-              <RankRail
-                mode="specimen"
-                rank={rank}
-                advRank={qualifiedAdv ? advRank : null}
-              />
-            </div>
-
-            <figcaption className="specimen__caption">
-              FIG. 01 / Rank position on a logarithmic scale.
-            </figcaption>
-
-            <ul className="specimen__legend">
-              <li>
-                <span className="specimen__swatch" data-zone="rank" aria-hidden="true" />
-                CRL marker
-              </li>
-              {qualifiedAdv ? (
-                <li>
-                  <span className="specimen__swatch" data-zone="adv" aria-hidden="true" />
-                  Advanced rank marker
-                </li>
-              ) : null}
-            </ul>
-
-            <div className="specimen__counts">
-              <span className="chip">
-                <span className="mono-label">Institutes</span>
-                <span className="tabular">{counts.colleges ?? '—'}</span>
-              </span>
-              <span className="chip">
-                <span className="mono-label">Branches</span>
-                <span className="tabular">{counts.branches ?? '—'}</span>
-              </span>
-            </div>
-          </figure>
+        <aside className="profile__aside hero">
+          <h1 className="hero__title" id="profile-title">
+            JEE College<br />Predictor 2026 (JoSAA)
+          </h1>
+          <p className="hero__copy">
+            Predict your admission chances into IITs, NITs, IIITs &amp; top Govt B.Tech colleges
+            based on your JEE rank, then refine the list with what you care about.
+          </p>
+          <ul className="hero__list">
+            <li>Completely FREE to use</li>
+            <li>Based on official JoSAA 2024 &amp; 2025 cutoffs</li>
+            <li>
+              Placement %, packages and student reviews
+              {counts.colleges ? ` · ${counts.colleges} institutes, ${counts.branches} branches` : ''}
+            </li>
+          </ul>
         </aside>
       </div>
     </section>

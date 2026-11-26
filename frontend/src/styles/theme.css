@@ -1,0 +1,101 @@
+/* Blue grid theme: white text on blue ground, dark text inside white cards. */
+:root {
+  --blue: #0066ff;
+  --bg-deep: var(--blue);
+  --bg-canvas: var(--blue);
+  --panel: #ffffff;
+  --panel-soft: #f3f6fb;
+  --line: #ffffff33;
+  --line-strong: #ffffff66;
+  --text: #ffffff;
+  --copy: #ffffffe6;
+  --muted: #dbe7ff;
+  --accent: #ffffff;
+  --selection: #ffffff40;
+  --serif: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --radius: 12px;
+  --radius-sm: 8px;
+  color-scheme: light;
+}
+body, .app-shell {
+  background-color: var(--blue);
+  background-image:
+    linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px);
+  background-size: 64px 64px;
+  font-family: var(--serif);
+}
+.grid-ground { background: none !important; }
+.topbar { background: transparent !important; border-bottom-color: #ffffff26 !important; }
+.colophon { background: transparent !important; }
+
+/* White surfaces get the dark palette */
+.profile__form, .main > .screen:not(.profile), .auth-modal, .modal, [role="dialog"] > div,
+.panel, .error-banner {
+  --panel: #ffffff;
+  --panel-soft: #f3f6fb;
+  --line: #e5e7eb;
+  --line-strong: #cbd5e1;
+  --text: #0f172a;
+  --copy: #334155;
+  --muted: #64748b;
+  --accent: var(--blue);
+  --selection: #0066ff26;
+  color: var(--text);
+  background: #ffffff;
+  border-radius: 12px;
+  border: 0;
+  box-shadow: 0 10px 30px rgba(0, 40, 120, .25);
+}
+.main > .screen:not(.profile) { padding: 24px; margin-block: 24px; }
+
+/* Profile: hero left, form card right */
+.profile__grid {
+  display: grid; grid-template-columns: 1.2fr minmax(320px, 448px);
+  gap: 48px; align-items: center; min-height: calc(100vh - 160px);
+}
+.profile__aside { order: -1; }
+.hero__title { font-size: clamp(40px, 6vw, 72px); font-weight: 800; line-height: 1.1; color: #fff; margin: 0 0 28px; }
+.hero__copy { color: #fff; max-width: 60ch; margin: 0 0 24px; line-height: 1.45; }
+.hero__list { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; color: #fff; }
+.hero__list li { display: flex; gap: 10px; align-items: center; }
+.hero__list li::before {
+  content: '✓'; flex: none; width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; color: var(--blue); font-weight: 800; font-size: 13px;
+  display: grid; place-items: center;
+}
+.profile__form { padding: 24px; }
+.profile__head { border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 20px; }
+.profile__title { font-size: 20px; font-weight: 700; text-align: center; margin: 0; color: var(--text); }
+
+/* Inputs & buttons */
+.profile__form input, .profile__form select, .profile__form textarea,
+.main > .screen input, .main > .screen select, .main > .screen textarea, .auth-modal input {
+  background: #fff; color: #0f172a; border: 1px solid #e5e7eb; border-radius: 8px;
+}
+.profile__form input:focus, .profile__form select:focus, .profile__form textarea:focus {
+  border-color: var(--blue); outline: 1px solid var(--blue);
+}
+.btn--primary {
+  background: #3b82f6 !important; color: #fff !important; border: 0 !important;
+  border-radius: 8px; font-weight: 700;
+}
+.btn--primary:hover { background: #2563eb !important; }
+.profile__submit { width: 100%; justify-content: center; }
+.topbar .btn, .topbar .wordmark, .topbar .index-nav__item, .colophon, .colophon .btn { color: #fff; }
+
+@media (max-width: 860px) {
+  .profile__grid { grid-template-columns: 1fr; gap: 32px; min-height: 0; padding-block: 24px; }
+}
+
+/* Skeleton loading */
+.skeleton { display: grid; gap: 12px; width: min(960px, 100%); margin: 32px auto; padding: 24px;
+  background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,40,120,.25); }
+.skeleton__row { display: grid; grid-template-columns: 3fr 2fr 1fr; gap: 16px; }
+.skeleton__bar { height: 16px; border-radius: 6px;
+  background: linear-gradient(90deg, #eef2f7 0%, #dfe6f0 50%, #eef2f7 100%);
+  background-size: 200% 100%; animation: sk 1.2s ease-in-out infinite; }
+.skeleton__bar--short { width: 60%; }
+@keyframes sk { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skeleton__bar { animation: none; } }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

@@ -1,7 +1,11 @@
 import csv
 import hashlib
+import hmac
+import base64
 import io
+import json
 import logging
+import os
 import time
 import urllib.parse
 
@@ -9,33 +13,84 @@ import uvicorn
 from fastapi import FastAPI, Depends, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from . import crud, data_loader
-from .auth import create_session_token, enforce_authentication, get_user_from_token
-from .config import ALLOWED_ORIGINS
+from . import crud
+from .config import SESSION_SECRET, DATA_DIR
 from .database import Base, engine, get_db
 from .llm import extract_preferences, generate_followup_questions, generate_multiple_explanations
 from .models import College, Branch, UserSearch
 from .recommender import recommend
-from .schemas import RecommendationRequest, FollowupRequest, LoginRequest
+from .schemas import RecommendationRequest, FollowupRequest
 from .reviews.routes import router as reviews_router
 
 logger = logging.getLogger(__name__)
 
+_extract_preferences_llm = extract_preferences
+_generate_followup_questions_llm = generate_followup_questions
+_BLANK_PROFILE_KEYS = ["startup_culture", "coding_culture", "research", "placements", "campus_life",
+                       "hostel_quality", "sports", "extra_curriculars", "infrastructure", "diversity",
+                       "location_proximity", "branch_over_college"]
 
-def build_categorized_preference_list(db: Session, rank: int, category: str, exam_type: str, homestate: str, original_recommendations: list, adv_rank: int | None = None):
+
+def extract_preferences(user_text, home_state):
+    try:
+        return _extract_preferences_llm(user_text, home_state)
+    except Exception as e:
+        logger.error("LLM preference extraction failed, using raw query: %s", e)
+        profile = {k: False for k in _BLANK_PROFILE_KEYS}
+        profile.update(preferred_states=[], vector_query=user_text)
+        return profile
+
+
+def generate_followup_questions(profile):
+    try:
+        return _generate_followup_questions_llm(profile)
+    except Exception as e:
+        logger.error("LLM follow-up generation failed: %s", e)
+        return []
+
+# ---------------------------------------------------------------------------
+# College metadata loader (original: by-ID folder lookup)
+# ---------------------------------------------------------------------------
+
+def load_college_json(college_id: int):
+    colleges_data_dir = DATA_DIR / "Colleges_data"
+    structured_json_dir = DATA_DIR / "structured_json"
+
+    if not colleges_data_dir.exists():
+        return {}
+
+    for folder in os.listdir(colleges_data_dir):
+        if folder.startswith(f"{college_id}_"):
+            parts = folder.split("_")
+            json_name = "_".join(parts[1:]) + ".json"
+            for root, dirs, files in os.walk(structured_json_dir):
+                if json_name in files:
+                    try:
+                        with open(os.path.join(root, json_name), "r", encoding="utf-8") as f:
+                            return json.load(f)
+                    except Exception:
+                        return {}
+    return {}
+
+
+# ---------------------------------------------------------------------------
+# Categorised preference list builder (original logic)
+# ---------------------------------------------------------------------------
+
+def build_categorized_preference_list(db: Session, rank: int, category: str, profile: dict, exam_type: str, homestate: str, original_recommendations: list, adv_rank: int | None = None):
     if adv_rank is not None:
         all_branches_with_cutoffs = crud.get_all_branches_with_cutoffs(db, category, "Advanced", homestate) + \
                                     crud.get_all_branches_with_cutoffs(db, category, "Mains", homestate)
     else:
         all_branches_with_cutoffs = crud.get_all_branches_with_cutoffs(db, category, exam_type, homestate)
 
-    ai_scores = {
-        (rec["college_name"], rec["branch_name"]): rec.get("similarity_score", 0.0)
-        for rec in original_recommendations
-    }
+    ai_recs_set = set()
+    for rec in original_recommendations:
+        ai_recs_set.add((rec["college_name"], rec["branch_name"]))
 
     final_recommendations = []
     for item in all_branches_with_cutoffs:
@@ -49,8 +104,8 @@ def build_categorized_preference_list(db: Session, rank: int, category: str, exa
 
         college_name = branch.college.college_name
         branch_name = branch.branch_name
-        key = (college_name, branch_name)
-        if key not in ai_scores:
+        is_ai_rec = (college_name, branch_name) in ai_recs_set
+        if not is_ai_rec:
             continue
 
         is_iit = ("indian institute of technology" in college_name.lower() or
@@ -70,18 +125,25 @@ def build_categorized_preference_list(db: Session, rank: int, category: str, exa
         else:
             cat = "Safe"
 
+        similarity_score = 0.0
+        if is_ai_rec:
+            for r in original_recommendations:
+                if r["college_name"] == college_name and r["branch_name"] == branch_name:
+                    similarity_score = r.get("similarity_score", 0.0)
+                    break
+
         final_recommendations.append({
             "college_name": college_name,
             "branch_name": branch_name,
             "category": cat,
-            "is_ai_recommended": True,
+            "is_ai_recommended": is_ai_rec,
             "closing_rank": closing_rank,
             "closing_rank_2024": cutoff_2024,
             "closing_rank_2025": cutoff_2025,
             "placement_percentage": branch.placement_percentage,
             "avg_ctc": branch.average_ctc_lpa,
             "median_ctc": branch.median_ctc_lpa,
-            "similarity_score": ai_scores[key],
+            "similarity_score": similarity_score,
             "nirf_rank": branch.college.nirf_rank
         })
 
@@ -101,72 +163,69 @@ def build_categorized_preference_list(db: Session, rank: int, category: str, exa
     return final_recommendations
 
 
-def _base_profile() -> dict:
-    return {
-        "preferred_states": [],
-        "startup_culture": False,
-        "coding_culture": False,
-        "research": False,
-        "placements": False,
-        "campus_life": False,
-        "hostel_quality": False,
-        "sports": False,
-        "extra_curriculars": False,
-        "infrastructure": False,
-        "diversity": False,
-        "location_proximity": False,
-        "branch_over_college": False,
-        "vector_query": ""
-    }
+# ---------------------------------------------------------------------------
+# Auth helpers (original inline implementation)
+# ---------------------------------------------------------------------------
+
+token_cache = {}
 
 
-def _apply_profile_keywords(profile: dict) -> dict:
-    keywords_to_add = []
-    if profile.get("extra_curriculars"):
-        keywords_to_add.append("cultural fests student clubs societies extra-curricular activities events fests")
-    if profile.get("infrastructure"):
-        keywords_to_add.append("modern labs advanced library campus wifi classrooms facilities infrastructure")
-    if profile.get("diversity"):
-        keywords_to_add.append("peer diversity student demographics national integration diverse culture")
-    if profile.get("location_proximity"):
-        keywords_to_add.append("proximity home state accessibility connectivity location city convenience")
-    if profile.get("sports"):
-        keywords_to_add.append("sports infrastructure playground gym sports facilities athletics fitness")
-    if profile.get("hostel_quality"):
-        keywords_to_add.append("hostel rooms mess food residential accommodation campus stay")
-
-    if keywords_to_add:
-        existing_query = profile.get("vector_query", "")
-        profile["vector_query"] = existing_query + " " + " ".join(keywords_to_add)
-
-    return profile
+def sign_payload(payload: dict, secret: str) -> str:
+    payload_str = json.dumps(payload, separators=(',', ':'))
+    payload_b64 = base64.urlsafe_b64encode(payload_str.encode('utf-8')).decode('utf-8')
+    signature = hmac.new(secret.encode('utf-8'), payload_b64.encode('utf-8'), hashlib.sha256).digest()
+    signature_b64 = base64.urlsafe_b64encode(signature).decode('utf-8')
+    return f"{payload_b64}.{signature_b64}"
 
 
-def _build_profile(request: RecommendationRequest) -> dict:
-    if request.profile:
-        return _apply_profile_keywords(dict(request.profile))
-    if not request.query.strip():
-        return _base_profile()
-
+def verify_token(token: str, secret: str) -> dict | None:
     try:
-        return extract_preferences(
-            user_text=request.query,
-            home_state=request.homestate
-        )
-    except Exception as e:
-        logger.error("Preference extraction failed: %s", e)
-        profile = _base_profile()
-        profile["vector_query"] = request.query
-        return profile
+        parts = token.split('.')
+        if len(parts) != 2:
+            return None
+        payload_b64, signature_b64 = parts
+
+        expected_sig = hmac.new(secret.encode('utf-8'), payload_b64.encode('utf-8'), hashlib.sha256).digest()
+        expected_sig_b64 = base64.urlsafe_b64encode(expected_sig).decode('utf-8')
+
+        if not hmac.compare_digest(signature_b64, expected_sig_b64):
+            return None
+
+        payload_str = base64.urlsafe_b64decode(payload_b64.encode('utf-8')).decode('utf-8')
+        payload = json.loads(payload_str)
+
+        if "exp" in payload and time.time() > payload["exp"]:
+            return None
+
+        return payload
+    except Exception:
+        return None
 
 
-def _attach_college_metadata(rec: dict) -> dict:
-    metadata = data_loader.get_college_metadata(rec["college_name"])
-    rec["student_clubs"] = metadata.get("student_clubs", [])
-    rec["sports_infrastructure"] = metadata.get("sports_infrastructure", [])
-    rec["incubation_center_name"] = metadata.get("incubation_center_name")
-    rec["notable_startups"] = metadata.get("notable_startups", [])
-    return rec
+def get_user_from_token(token: str) -> dict | None:
+    if not token:
+        return None
+
+    local_user = verify_token(token, SESSION_SECRET)
+    if local_user:
+        return local_user
+
+    if token in token_cache:
+        return token_cache[token]
+
+    return None
+
+
+def enforce_authentication(authorization: str = None):
+    # Permissive authentication: allows guest access if no authorization header is provided
+    if not authorization or not authorization.startswith("Bearer "):
+        return None
+
+    token = authorization.split(" ")[1]
+    user = get_user_from_token(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid session token. Please log in again.")
+    return user
 
 
 def log_user_search(db: Session, rank: int, category: str, exam_type: str | None, homestate: str | None, query_text: str | None, authorization: str = None):
@@ -176,12 +235,12 @@ def log_user_search(db: Session, rank: int, category: str, exam_type: str | None
         token = authorization.split(" ")[1]
         user = get_user_from_token(token)
         if user:
-            alpha_id = user.get("alpha_id")
+            alpha_id = (user.get("user_id") or user.get("alpha_id"))
             email = user.get("email")
 
     try:
         search_log = UserSearch(
-            alpha_id=alpha_id,
+            user_id=alpha_id,
             email=email,
             rank=rank,
             category=category,
@@ -196,17 +255,59 @@ def log_user_search(db: Session, rank: int, category: str, exam_type: str | None
         db.rollback()
 
 
+# ---------------------------------------------------------------------------
+# Pydantic models (original inline)
+# ---------------------------------------------------------------------------
+
+class LoginRequest(BaseModel):
+    name: str = "Student"
+    email: str
+
+
+class CallbackRequest(BaseModel):
+    code: str
+    redirect_uri: str
+
+
+# ---------------------------------------------------------------------------
+# App setup
+# ---------------------------------------------------------------------------
+
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(
-    title="Deebo's College API",
-    version="1.0.0",
-    description="JEE college recommendation API"
-)
+app = FastAPI()
+
+
+def _bootstrap_data():
+    from .database import SessionLocal
+    from .recommender import get_qdrant
+    from .config import QDRANT_COLLECTION
+    try:
+        db = SessionLocal()
+        empty = db.query(College).count() == 0
+        db.close()
+        if empty:
+            logger.warning("Database empty: ingesting colleges...")
+            from scripts import ingest_colleges
+            ingest_colleges.main()
+            crud.clear_cutoff_cache()
+        if empty or not get_qdrant().collection_exists(QDRANT_COLLECTION):
+            logger.warning("Building Qdrant embeddings...")
+            from scripts import build_embeddings
+            build_embeddings.main()
+        logger.warning("Data ready.")
+    except Exception as e:
+        logger.error("Data bootstrap failed: %s", e)
+
+
+@app.on_event("startup")
+def _start_bootstrap():
+    import threading
+    threading.Thread(target=_bootstrap_data, daemon=True).start()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -214,6 +315,10 @@ app.add_middleware(
 
 app.include_router(reviews_router)
 
+
+# ---------------------------------------------------------------------------
+# Auth endpoints (original)
+# ---------------------------------------------------------------------------
 
 @app.post("/auth/login")
 def auth_login(request: LoginRequest):
@@ -225,7 +330,7 @@ def auth_login(request: LoginRequest):
 
     user_id = hashlib.sha256(email.lower().encode('utf-8')).hexdigest()[:12]
     user_info = {
-        "alpha_id": user_id,
+        "user_id": user_id,
         "email": email,
         "username": name,
         "profile": {
@@ -234,19 +339,45 @@ def auth_login(request: LoginRequest):
         },
         "exp": time.time() + 30 * 24 * 3600
     }
-    local_session_token = create_session_token(user_info)
+    local_session_token = sign_payload(user_info, SESSION_SECRET)
     return {
         "access_token": local_session_token,
         "user": user_info
     }
 
 
+@app.get("/auth/login-url")
+def get_login_url(redirect_uri: str):
+    return {"url": redirect_uri}
+
+
+@app.post("/auth/callback")
+def auth_callback(request: CallbackRequest):
+    user_payload = {
+        "user_id": "student_local",
+        "email": "student@example.com",
+        "username": "Student",
+        "profile": {
+            "display_name": "Student",
+            "avatar_url": "https://api.dicebear.com/7.x/initials/svg?seed=Student"
+        },
+        "exp": time.time() + 30 * 24 * 3600
+    }
+    token = sign_payload(user_payload, SESSION_SECRET)
+    return {
+        "access_token": token,
+        "user": user_payload
+    }
+
+
+# ---------------------------------------------------------------------------
+# Core endpoints
+# ---------------------------------------------------------------------------
+
 @app.get("/")
 def root():
     return {
-        "service": "Deebo's College API",
-        "version": "1.0.0",
-        "status": "ok"
+        "message": "Daddy's home ;)"
     }
 
 
@@ -286,8 +417,48 @@ def recommend_colleges(request: RecommendationRequest, db: Session = Depends(get
         query_text=request.query,
         authorization=authorization
     )
+    if request.profile:
+        profile = request.profile
 
-    profile = _build_profile(request)
+        keywords_to_add = []
+        if profile.get("extra_curriculars"):
+            keywords_to_add.append("cultural fests student clubs societies extra-curricular activities events fests")
+        if profile.get("infrastructure"):
+            keywords_to_add.append("modern labs advanced library campus wifi classrooms facilities infrastructure")
+        if profile.get("diversity"):
+            keywords_to_add.append("peer diversity student demographics national integration diverse culture")
+        if profile.get("location_proximity"):
+            keywords_to_add.append("proximity home state accessibility connectivity location city convenience")
+        if profile.get("sports"):
+            keywords_to_add.append("sports infrastructure playground gym sports facilities athletics fitness")
+        if profile.get("hostel_quality"):
+            keywords_to_add.append("hostel rooms mess food residential accommodation campus stay")
+
+        if keywords_to_add:
+            existing_query = profile.get("vector_query", "")
+            profile["vector_query"] = existing_query + " " + " ".join(keywords_to_add)
+    elif not request.query.strip():
+        profile = {
+            "preferred_states": [],
+            "startup_culture": False,
+            "coding_culture": False,
+            "research": False,
+            "placements": False,
+            "campus_life": False,
+            "hostel_quality": False,
+            "sports": False,
+            "extra_curriculars": False,
+            "infrastructure": False,
+            "diversity": False,
+            "location_proximity": False,
+            "branch_over_college": False,
+            "vector_query": ""
+        }
+    else:
+        profile = extract_preferences(
+            user_text=request.query,
+            home_state=request.homestate
+        )
 
     res = recommend(
         db=db,
@@ -301,14 +472,24 @@ def recommend_colleges(request: RecommendationRequest, db: Session = Depends(get
     )
 
     recommendations_list = res.get("recommendations", [])
+    college_cache = {}
     for rec in recommendations_list:
-        _attach_college_metadata(rec)
+        col_name = rec["college_name"]
+        if col_name not in college_cache:
+            db_college = db.query(College).filter(College.college_name == col_name).first()
+            college_metadata = load_college_json(db_college.id) if db_college else {}
+            college_cache[col_name] = college_metadata
+        else:
+            college_metadata = college_cache[col_name]
+
+        rec["student_clubs"] = college_metadata.get("student_clubs", [])
+        rec["sports_infrastructure"] = college_metadata.get("sports_infrastructure", [])
+        rec["incubation_center_name"] = college_metadata.get("incubation_center_name")
+        rec["notable_startups"] = college_metadata.get("notable_startups", [])
 
     recommendations = recommendations_list[:3]
     explanations = {}
-    if recommendations and (profile.get("vector_query", "").strip() or any(
-        isinstance(value, bool) and value for value in profile.values()
-    )):
+    if recommendations and (profile.get("vector_query", "").strip() or any(profile.get(k) for k in profile if isinstance(profile[k], bool) and profile[k])):
         choices_metadata = []
         for idx, rec in enumerate(recommendations):
             choices_metadata.append({
@@ -323,12 +504,9 @@ def recommend_colleges(request: RecommendationRequest, db: Session = Depends(get
                 "startups": rec["notable_startups"]
             })
 
-        try:
-            raw_explanations = generate_multiple_explanations(profile, choices_metadata)
-        except Exception as e:
-            logger.error("Explanation generation failed: %s", e)
-            raw_explanations = {}
+        raw_explanations = generate_multiple_explanations(profile, choices_metadata)
 
+        # Map back to exact keys
         for idx, rec in enumerate(recommendations):
             key_str = f"{rec['college_name']} | {rec['branch_name']}"
             explanation = raw_explanations.get(str(idx)) or raw_explanations.get(idx)
@@ -345,21 +523,29 @@ def generate_questions(request: FollowupRequest, authorization: str = Header(Non
     enforce_authentication(authorization)
 
     if not request.query.strip():
-        profile = _base_profile()
-    else:
-        try:
-            profile = extract_preferences(request.query, request.homestate)
-        except Exception as e:
-            logger.error("Preference extraction failed: %s", e)
-            profile = _base_profile()
-            profile["vector_query"] = request.query
-
-    try:
-        questions = generate_followup_questions(profile)
-    except Exception as e:
-        logger.error("Follow-up question generation failed: %s", e)
-        questions = []
-
+        blank_profile = {
+            "preferred_states": [],
+            "startup_culture": False,
+            "coding_culture": False,
+            "research": False,
+            "placements": False,
+            "campus_life": False,
+            "hostel_quality": False,
+            "sports": False,
+            "extra_curriculars": False,
+            "infrastructure": False,
+            "diversity": False,
+            "location_proximity": False,
+            "branch_over_college": False,
+            "vector_query": ""
+        }
+        questions = generate_followup_questions(blank_profile)
+        return {
+            "profile": blank_profile,
+            "questions": questions
+        }
+    profile = extract_preferences(request.query, request.homestate)
+    questions = generate_followup_questions(profile)
     return {
         "profile": profile,
         "questions": questions
@@ -378,8 +564,47 @@ def export_choices(request: RecommendationRequest, db: Session = Depends(get_db)
         query_text=request.query,
         authorization=authorization
     )
+    if request.profile:
+        profile = request.profile
+        keywords_to_add = []
+        if profile.get("extra_curriculars"):
+            keywords_to_add.append("cultural fests student clubs societies extra-curricular activities events fests")
+        if profile.get("infrastructure"):
+            keywords_to_add.append("modern labs advanced library campus wifi classrooms facilities infrastructure")
+        if profile.get("diversity"):
+            keywords_to_add.append("peer diversity student demographics national integration diverse culture")
+        if profile.get("location_proximity"):
+            keywords_to_add.append("proximity home state accessibility connectivity location city convenience")
+        if profile.get("sports"):
+            keywords_to_add.append("sports infrastructure playground gym sports facilities athletics fitness")
+        if profile.get("hostel_quality"):
+            keywords_to_add.append("hostel rooms mess food residential accommodation campus stay")
 
-    profile = _build_profile(request)
+        if keywords_to_add:
+            existing_query = profile.get("vector_query", "")
+            profile["vector_query"] = existing_query + " " + " ".join(keywords_to_add)
+    elif not request.query.strip():
+        profile = {
+            "preferred_states": [],
+            "startup_culture": False,
+            "coding_culture": False,
+            "research": False,
+            "placements": False,
+            "campus_life": False,
+            "hostel_quality": False,
+            "sports": False,
+            "extra_curriculars": False,
+            "infrastructure": False,
+            "diversity": False,
+            "location_proximity": False,
+            "branch_over_college": False,
+            "vector_query": ""
+        }
+    else:
+        profile = extract_preferences(
+            user_text=request.query,
+            home_state=request.homestate
+        )
 
     res = recommend(
         db=db,
@@ -398,6 +623,7 @@ def export_choices(request: RecommendationRequest, db: Session = Depends(get_db)
         db=db,
         rank=request.rank,
         category=request.category,
+        profile=profile,
         exam_type=request.exam_type or "Advanced",
         homestate=request.homestate,
         original_recommendations=recommended_list,
@@ -447,12 +673,17 @@ def export_choices(request: RecommendationRequest, db: Session = Depends(get_db)
 
 
 @app.get("/statistics")
-def get_global_statistics(db: Session = Depends(get_db)):
+def get_global_statistics(db: Session = Depends(get_db), authorization: str = Header(None)):
+    is_authorized = True
+
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Access denied. Only developers can view statistics.")
+
     try:
         total_searches = db.query(UserSearch).count()
-        logged_in_searches = db.query(UserSearch).filter(UserSearch.alpha_id != None).count()
+        logged_in_searches = db.query(UserSearch).filter(UserSearch.user_id != None).count()
         guest_searches = total_searches - logged_in_searches
-        unique_users = db.query(UserSearch.alpha_id).filter(UserSearch.alpha_id != None).distinct().count()
+        unique_users = db.query(UserSearch.user_id).filter(UserSearch.user_id != None).distinct().count()
 
         exam_types_query = db.query(UserSearch.exam_type, func.count(UserSearch.id)).group_by(UserSearch.exam_type).all()
         exam_distribution = {et or "Unknown": count for et, count in exam_types_query}

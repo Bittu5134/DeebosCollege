@@ -1,5 +1,13 @@
 from pydantic import BaseModel
 
+class CollegeResponse(BaseModel):
+    id: int
+    college_name: str
+    branch_name: str
+    avg_ctc: float | None
+    placement_percentage: float | None
+    class Config:
+        from_attributes = True
 
 class RecommendationRequest(BaseModel):
     rank: int
@@ -13,7 +21,3 @@ class RecommendationRequest(BaseModel):
 class FollowupRequest(BaseModel):
     query: str
     homestate: str
-
-class LoginRequest(BaseModel):
-    name: str = "Student"
-    email: str

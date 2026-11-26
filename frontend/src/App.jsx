@@ -18,8 +18,26 @@ const readSession = (key) => {
 	}
 };
 
+const readSharedInputs = () => {
+	try {
+		const m = window.location.hash.match(/^#q=(.+)$/);
+		if (m) return JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+		const saved = localStorage.getItem("deebo_inputs");
+		return saved ? JSON.parse(saved) : null;
+	} catch {
+		return null;
+	}
+};
+
+const encodeInputs = (inputs) => {
+	const { rank, advRank, category, gender, homeState, qualifiedAdv, preferences } = inputs || {};
+	return btoa(unescape(encodeURIComponent(JSON.stringify(
+		{ rank, advRank, category, gender, homeState, qualifiedAdv, preferences },
+	))));
+};
+
 const readUser = () => {
-	const raw = localStorage.getItem("alpha_user");
+	const raw = localStorage.getItem("deebo_user");
 	if (!raw) return null;
 	try {
 		return JSON.parse(raw);
@@ -43,8 +61,20 @@ export default function App() {
 	);
 	const [loading, setLoading] = useState(false);
 	const [userInputs, setUserInputs] = useState(() =>
-		readSession("bw_userInputs"),
+		readSharedInputs() || readSession("bw_userInputs"),
 	);
+	const [copied, setCopied] = useState(false);
+	const copyShareLink = async () => {
+		if (!userInputs) return;
+		const url = `${window.location.origin}${window.location.pathname}#q=${encodeInputs(userInputs)}`;
+		try {
+			await navigator.clipboard.writeText(url);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch {
+			window.location.hash = `q=${encodeInputs(userInputs)}`;
+		}
+	};
 	const [results, setResults] = useState(() => readSession("bw_results"));
 	const [questions, setQuestions] = useState(
 		() => readSession("bw_questions") || [],
@@ -54,7 +84,7 @@ export default function App() {
 	);
 	const [user, setUser] = useState(readUser);
 	const [token, setToken] = useState(
-		() => localStorage.getItem("alpha_token") || null,
+		() => localStorage.getItem("deebo_token") || null,
 	);
 	const [showStats, setShowStats] = useState(false);
 	const [showAuth, setShowAuth] = useState(false);
@@ -70,7 +100,14 @@ export default function App() {
 
 	useEffect(() => {
 		if (userInputs)
+		{
 			sessionStorage.setItem("bw_userInputs", JSON.stringify(userInputs));
+			try {
+				localStorage.setItem("deebo_inputs", JSON.stringify(userInputs));
+			} catch {
+				/* storage unavailable */
+			}
+		}
 	}, [userInputs]);
 
 	useEffect(() => {
@@ -93,8 +130,8 @@ export default function App() {
 	}, [initialProfile]);
 
 	const handleSignOut = () => {
-		localStorage.removeItem("alpha_token");
-		localStorage.removeItem("alpha_user");
+		localStorage.removeItem("deebo_token");
+		localStorage.removeItem("deebo_user");
 		setToken(null);
 		setUser(null);
 		setError("");
@@ -103,8 +140,8 @@ export default function App() {
 	const handleAuthSuccess = (data) => {
 		setToken(data.access_token);
 		setUser(data.user);
-		localStorage.setItem("alpha_token", data.access_token);
-		localStorage.setItem("alpha_user", JSON.stringify(data.user));
+		localStorage.setItem("deebo_token", data.access_token);
+		localStorage.setItem("deebo_user", JSON.stringify(data.user));
 		setShowAuth(false);
 	};
 
@@ -302,6 +339,11 @@ export default function App() {
 				</nav>
 
 				<div className="topbar__actions">
+					{userInputs ? (
+						<button type="button" className="btn btn--text btn--sm" onClick={copyShareLink}>
+							{copied ? "Link copied" : "Share"}
+						</button>
+					) : null}
 					<button
 						type="button"
 						className="btn btn--text btn--sm"
@@ -351,9 +393,15 @@ export default function App() {
 
 			<main className="main">
 				{loading ? (
-					<div className="loading-screen">
-						<span className="loading-line" aria-hidden="true" />
-						<span>Matching your rank against the index...</span>
+					<div className="loading-screen skeleton" aria-busy="true">
+						<span className="sr-only">Matching your rank against the index...</span>
+						{Array.from({ length: 6 }).map((_, i) => (
+							<div className="skeleton__row" key={i} aria-hidden="true">
+								<span className="skeleton__bar skeleton__bar--wide" />
+								<span className="skeleton__bar" />
+								<span className="skeleton__bar skeleton__bar--short" />
+							</div>
+						))}
 					</div>
 				) : (
 					renderScreen()

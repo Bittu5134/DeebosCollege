@@ -28,8 +28,8 @@ function AuthForm({ onClose, onSuccess }) {
 
     try {
       const data = await api.login({ name: name.trim(), email: trimmed });
-      localStorage.setItem('alpha_token', data.access_token);
-      localStorage.setItem('alpha_user', JSON.stringify(data.user));
+      localStorage.setItem('deebo_token', data.access_token);
+      localStorage.setItem('deebo_user', JSON.stringify(data.user));
       onSuccess?.(data);
       onClose?.();
     } catch (err) {

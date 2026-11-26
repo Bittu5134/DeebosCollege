@@ -146,7 +146,7 @@ export default function StudentReviewsScreen({ user, token }) {
 		if (votedMap[reviewId]) return;
 		try {
 			const userIdentifier =
-				user?.alpha_id ||
+				user?.user_id || user?.alpha_id ||
 				localStorage.getItem("ci_user_uid") ||
 				`anon_${Math.random().toString(36).substring(2, 9)}`;
 			localStorage.setItem("ci_user_uid", userIdentifier);

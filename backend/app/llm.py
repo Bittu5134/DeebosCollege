@@ -118,7 +118,7 @@ Current extracted profile:
 Generate between 5 and 10 follow-up questions.
 ONLY ask about fields that are still unclear or set to false/empty in the profile.
 Ensure that the final output has AT LEAST 5 questions and AT MOST 10 questions.
-Keep the tone friendly and encouraging without being overly familiar.
+Be a bit love flirtatious with emojis use keywords like (darling, baby) etc etc but don't overuse these words.
 
 For each follow-up question, instead of generic yes/no options, you MUST generate highly customized options tailored to the specific field/question.
 Specifically, return a custom "yes_title" and "yes_desc" (representing the choice where the student cares about/prefers this option, setting the field to true) and a custom "no_title" and "no_desc" (representing the choice where the student does not care about/prefers not to prioritize this, keeping/setting the field to false).
@@ -143,7 +143,7 @@ Example:
 [
   {{
     "field": "research",
-    "question": "How important are research opportunities and projects to you?",
+    "question": "How important are research opportunities and projects to you, darling?",
     "yes_title": "Yes, research is my passion",
     "yes_desc": "I want to publish papers and work on projects with professors.",
     "no_title": "No, not a major focus",
@@ -151,7 +151,7 @@ Example:
   }},
   {{
     "field": "extra_curriculars",
-    "question": "Are you interested in participating in student clubs and cultural festivals?",
+    "question": "Are you interested in participating in student clubs and cultural festivals, baby?",
     "yes_title": "Yes, I want active campus life",
     "yes_desc": "I'd love to join clubs, plan fests, and organize cultural activities.",
     "no_title": "No, I prefer peace",
@@ -161,6 +161,7 @@ Example:
 """
 
     response = _generate(prompt)
+
     text = extract_json_from_text(response)
     return json.loads(text)
 
@@ -219,13 +220,13 @@ def extract_preferences(user_text: str,home_state: str):
         """
 
     response = _generate(prompt)
+
     text = extract_json_from_text(response)
     return json.loads(text)
 
-
 def generate_multiple_explanations(profile: dict, choices: list) -> dict:
     prompt = f"""
-You are a friendly Deebo's College college counselor who explains in a warm way.
+You are a friendly, college counselor who explains in a warm way.
 
 Student preferences:
 {json.dumps(profile, indent=2)}
@@ -245,6 +246,10 @@ Example:
   "1": "This fits because... 🎨"
 }}
 """
-    response = _generate(prompt)
-    text = extract_json_from_text(response)
-    return json.loads(text)
+    try:
+        response = _generate(prompt)
+        text = extract_json_from_text(response)
+        return json.loads(text)
+    except Exception as e:
+        print(f"Error generating multiple explanations: {e}")
+        return {}

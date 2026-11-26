@@ -63,7 +63,7 @@ class UserSearch(Base):
     __tablename__ = "user_searches"
 
     id = Column(Integer, primary_key=True)
-    alpha_id = Column(String, index=True, nullable=True)
+    user_id = Column("alpha_id", String, index=True, nullable=True)
     email = Column(String, nullable=True)
     rank = Column(Integer)
     category = Column(String)
