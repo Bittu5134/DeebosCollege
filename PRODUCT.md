@@ -25,8 +25,8 @@ A search is a one-off session: enter rank, category, gender, home state, optiona
 ## Capabilities and Constraints
 
 - FastAPI backend, React and Vite frontend, PostgreSQL or SQLite, Qdrant, Gemini or an OpenAI-compatible LLM.
-- Existing endpoints and response shapes must keep working: `/generate-questions`, `/recommend`, `/export-choices`, `/statistics`, `/auth/login`, `/colleges`, `/branches`.
-- Sign-in is a demo session: any email creates a local token. There is no password or identity provider.
+- Existing endpoints and response shapes must keep working: `/generate-questions`, `/recommend`, `/export-choices`, `/statistics`, `/colleges`, `/branches`.
+- There are no accounts or sign-in. Everything works anonymously.
 - Some cutoff and campus fields are missing or incomplete. The interface must show missing data honestly.
 - The design is dark only, by explicit user choice.
 - The visual direction is pinned to the pi.dev editorial and terminal language, adapted to an Operate surface.
@@ -50,7 +50,7 @@ A search is a one-off session: enter rank, category, gender, home state, optiona
 - Show the evidence: closing rank, placement, CTC, NIRF and campus signals.
 - One continuous flow: profile, interview, index, export.
 - Calm density: many options, but a clear scan path.
-- Honest limits: say when data is missing, and say that sign-in is a demo.
+- Honest limits: say when data is missing.
 
 ## Accessibility & Inclusion
 

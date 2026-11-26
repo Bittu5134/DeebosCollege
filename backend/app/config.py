@@ -21,7 +21,6 @@ QDRANT_URL = os.getenv("QDRANT_URL")
 QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "branches")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
 
-SESSION_SECRET = os.getenv("SESSION_SECRET", "change_me_in_production")
 ALLOWED_ORIGINS = [
     origin.strip()
     for origin in os.getenv(

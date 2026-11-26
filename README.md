@@ -27,7 +27,7 @@ You need Docker with Compose v2.
 cp .env.example .env
 ```
 
-Edit `.env` and set `POSTGRES_PASSWORD`, `SESSION_SECRET`, and either the Gemini or OpenAI-compatible LLM values.
+Edit `.env` and set `POSTGRES_PASSWORD` and either the Gemini or OpenAI-compatible LLM values.
 
 ```bash
 docker compose up --build -d
@@ -142,13 +142,12 @@ docker compose exec backend python -m scripts.build_embeddings
 | POST | `/generate-questions` | Extract a preference profile and generate follow-up questions |
 | POST | `/export-choices` | Download the shortlist as CSV |
 | GET | `/statistics` | Aggregate search and placement statistics |
-| POST | `/auth/login` | Create a local demo session token |
 
 Interactive API docs are at `/docs`.
 
 ## Project layout
 
-- `backend/app`: FastAPI routes, ORM models, CRUD, auth, recommendation and LLM code
+- `backend/app`: FastAPI routes, ORM models, CRUD, recommendation and LLM code
 - `backend/scripts`: scraping, parsing, database ingestion and embedding scripts
 - `data/structured_json`: seed college dataset
 - `data/source/josaa`: raw JoSAA cutoff dumps
@@ -157,7 +156,6 @@ Interactive API docs are at `/docs`.
 
 ## Known limitations
 
-- Sign-in is a demo. Any email creates a signed local session token. There is no password, OAuth or user table, so do not treat it as real authentication.
 - `/statistics` is public.
 - Tables are created with `Base.metadata.create_all` at startup. There are no migrations.
 - The Qdrant collection has to be rebuilt after dataset changes. There is no incremental indexing.
