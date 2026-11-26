@@ -16,7 +16,6 @@ const CONTENT = {
         list: [
           'Academic Details: Ranks (JEE Main, JEE Advanced), home state, category, and gender.',
           'Preferences: Academic and campus preferences (such as interest in coding culture, research, startups, or placements).',
-          'Account Information: Account identifiers and email when you create an account or sign in.',
         ],
       },
       {
@@ -40,7 +39,7 @@ const CONTENT = {
         num: '04',
         heading: 'AI and Third-Party API Services',
         body: [
-          'Our recommendation explanations are generated using a third-party language model provider. Academic preferences and criteria are passed to the provider to produce descriptions. No account name or email is sent with that request.',
+          'Our recommendation explanations are generated using a third-party language model provider. Academic preferences and criteria are passed to the provider to produce descriptions. No personal information is sent with that request.',
         ],
       },
       {
@@ -75,7 +74,6 @@ const CONTENT = {
         num: '03',
         heading: 'User Authentication',
         body: [
-          'Sign-in is a demo session. Any email creates a local token. There is no password and no identity provider, so do not treat it as a real account.',
         ],
       },
       {

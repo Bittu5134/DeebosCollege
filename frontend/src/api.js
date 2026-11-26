@@ -84,9 +84,6 @@ export async function exportChoices(payload, token) {
   return response.blob();
 }
 
-export function login({ name, email }) {
-  return request('/auth/login', { method: 'POST', body: { name, email } });
-}
 
 export function statistics(token) {
   return request('/statistics', { token });
@@ -142,7 +139,6 @@ const api = {
   generateQuestions,
   recommend,
   exportChoices,
-  login,
   statistics,
   colleges,
   branches,

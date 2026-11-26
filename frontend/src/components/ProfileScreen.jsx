@@ -299,7 +299,6 @@ export default function ProfileScreen({ initialValues = null, onSubmit, loading 
                   </span>
                 )}
               </button>
-              <span className="profile__actions-note">No account required.</span>
             </div>
           </form>
         </div>

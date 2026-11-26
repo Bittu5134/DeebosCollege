@@ -1,7 +1,5 @@
 import csv
 import hashlib
-import hmac
-import base64
 import io
 import json
 import logging
@@ -13,12 +11,11 @@ import uvicorn
 from fastapi import FastAPI, Depends, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from . import crud
-from .config import SESSION_SECRET, DATA_DIR
+from .config import DATA_DIR
 from .database import Base, engine, get_db
 from .llm import extract_preferences, generate_followup_questions, generate_multiple_explanations, extract_profile_and_questions
 from .models import College, Branch, UserSearch
@@ -163,80 +160,9 @@ def build_categorized_preference_list(db: Session, rank: int, category: str, pro
     return final_recommendations
 
 
-# ---------------------------------------------------------------------------
-# Auth helpers (original inline implementation)
-# ---------------------------------------------------------------------------
-
-token_cache = {}
-
-
-def sign_payload(payload: dict, secret: str) -> str:
-    payload_str = json.dumps(payload, separators=(',', ':'))
-    payload_b64 = base64.urlsafe_b64encode(payload_str.encode('utf-8')).decode('utf-8')
-    signature = hmac.new(secret.encode('utf-8'), payload_b64.encode('utf-8'), hashlib.sha256).digest()
-    signature_b64 = base64.urlsafe_b64encode(signature).decode('utf-8')
-    return f"{payload_b64}.{signature_b64}"
-
-
-def verify_token(token: str, secret: str) -> dict | None:
-    try:
-        parts = token.split('.')
-        if len(parts) != 2:
-            return None
-        payload_b64, signature_b64 = parts
-
-        expected_sig = hmac.new(secret.encode('utf-8'), payload_b64.encode('utf-8'), hashlib.sha256).digest()
-        expected_sig_b64 = base64.urlsafe_b64encode(expected_sig).decode('utf-8')
-
-        if not hmac.compare_digest(signature_b64, expected_sig_b64):
-            return None
-
-        payload_str = base64.urlsafe_b64decode(payload_b64.encode('utf-8')).decode('utf-8')
-        payload = json.loads(payload_str)
-
-        if "exp" in payload and time.time() > payload["exp"]:
-            return None
-
-        return payload
-    except Exception:
-        return None
-
-
-def get_user_from_token(token: str) -> dict | None:
-    if not token:
-        return None
-
-    local_user = verify_token(token, SESSION_SECRET)
-    if local_user:
-        return local_user
-
-    if token in token_cache:
-        return token_cache[token]
-
-    return None
-
-
-def enforce_authentication(authorization: str = None):
-    # Permissive authentication: allows guest access if no authorization header is provided
-    if not authorization or not authorization.startswith("Bearer "):
-        return None
-
-    token = authorization.split(" ")[1]
-    user = get_user_from_token(token)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid session token. Please log in again.")
-    return user
-
-
 def log_user_search(db: Session, rank: int, category: str, exam_type: str | None, homestate: str | None, query_text: str | None, authorization: str = None):
-    alpha_id = None
+    alpha_id = None  # no accounts: searches are logged anonymously
     email = None
-    if authorization and authorization.startswith("Bearer "):
-        token = authorization.split(" ")[1]
-        user = get_user_from_token(token)
-        if user:
-            alpha_id = (user.get("user_id") or user.get("alpha_id"))
-            email = user.get("email")
 
     try:
         search_log = UserSearch(
@@ -253,20 +179,6 @@ def log_user_search(db: Session, rank: int, category: str, exam_type: str | None
     except Exception as e:
         logger.error("Error logging user search: %s", e)
         db.rollback()
-
-
-# ---------------------------------------------------------------------------
-# Pydantic models (original inline)
-# ---------------------------------------------------------------------------
-
-class LoginRequest(BaseModel):
-    name: str = "Student"
-    email: str
-
-
-class CallbackRequest(BaseModel):
-    code: str
-    redirect_uri: str
 
 
 # ---------------------------------------------------------------------------
@@ -317,60 +229,6 @@ app.include_router(reviews_router)
 
 
 # ---------------------------------------------------------------------------
-# Auth endpoints (original)
-# ---------------------------------------------------------------------------
-
-@app.post("/auth/login")
-def auth_login(request: LoginRequest):
-    email = request.email.strip()
-    name = request.name.strip() or "Student"
-
-    if not email:
-        raise HTTPException(status_code=400, detail="Email is required.")
-
-    user_id = hashlib.sha256(email.lower().encode('utf-8')).hexdigest()[:12]
-    user_info = {
-        "user_id": user_id,
-        "email": email,
-        "username": name,
-        "profile": {
-            "display_name": name,
-            "avatar_url": f"https://api.dicebear.com/7.x/initials/svg?seed={urllib.parse.quote(name)}"
-        },
-        "exp": time.time() + 30 * 24 * 3600
-    }
-    local_session_token = sign_payload(user_info, SESSION_SECRET)
-    return {
-        "access_token": local_session_token,
-        "user": user_info
-    }
-
-
-@app.get("/auth/login-url")
-def get_login_url(redirect_uri: str):
-    return {"url": redirect_uri}
-
-
-@app.post("/auth/callback")
-def auth_callback(request: CallbackRequest):
-    user_payload = {
-        "user_id": "student_local",
-        "email": "student@example.com",
-        "username": "Student",
-        "profile": {
-            "display_name": "Student",
-            "avatar_url": "https://api.dicebear.com/7.x/initials/svg?seed=Student"
-        },
-        "exp": time.time() + 30 * 24 * 3600
-    }
-    token = sign_payload(user_payload, SESSION_SECRET)
-    return {
-        "access_token": token,
-        "user": user_payload
-    }
-
-
-# ---------------------------------------------------------------------------
 # Core endpoints
 # ---------------------------------------------------------------------------
 
@@ -407,7 +265,6 @@ def predict(rank: int, category: str, homestate: str = "", db: Session = Depends
 
 @app.post("/recommend")
 def recommend_colleges(request: RecommendationRequest, db: Session = Depends(get_db), authorization: str = Header(None)):
-    enforce_authentication(authorization)
     log_user_search(
         db=db,
         rank=request.rank,
@@ -520,7 +377,6 @@ def recommend_colleges(request: RecommendationRequest, db: Session = Depends(get
 
 @app.post("/generate-questions")
 def generate_questions(request: FollowupRequest, authorization: str = Header(None)):
-    enforce_authentication(authorization)
 
     if not request.query.strip():
         blank_profile = {
@@ -560,7 +416,6 @@ def generate_questions(request: FollowupRequest, authorization: str = Header(Non
 
 @app.post("/export-choices")
 def export_choices(request: RecommendationRequest, db: Session = Depends(get_db), authorization: str = Header(None)):
-    enforce_authentication(authorization)
     log_user_search(
         db=db,
         rank=request.rank,

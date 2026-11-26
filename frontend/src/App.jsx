@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import api, { ApiError, getBackendCategory } from "./api";
-import AuthModal from "./components/AuthModal";
 import BrandMark from "./components/BrandMark";
 import InterviewScreen from "./components/InterviewScreen";
 import LegalPage from "./components/LegalPage";
@@ -34,16 +33,6 @@ const encodeInputs = (inputs) => {
 	return btoa(unescape(encodeURIComponent(JSON.stringify(
 		{ rank, advRank, category, gender, homeState, qualifiedAdv, preferences },
 	))));
-};
-
-const readUser = () => {
-	const raw = localStorage.getItem("deebo_user");
-	if (!raw) return null;
-	try {
-		return JSON.parse(raw);
-	} catch {
-		return null;
-	}
 };
 
 const STEPS = [
@@ -82,12 +71,9 @@ export default function App() {
 	const [initialProfile, setInitialProfile] = useState(() =>
 		readSession("bw_initialProfile"),
 	);
-	const [user, setUser] = useState(readUser);
-	const [token, setToken] = useState(
-		() => localStorage.getItem("deebo_token") || null,
-	);
+	const user = null;
+	const token = null;
 	const [showStats, setShowStats] = useState(false);
-	const [showAuth, setShowAuth] = useState(false);
 	const [error, setError] = useState("");
 
 	useEffect(() => {
@@ -129,28 +115,7 @@ export default function App() {
 		else sessionStorage.removeItem("bw_initialProfile");
 	}, [initialProfile]);
 
-	const handleSignOut = () => {
-		localStorage.removeItem("deebo_token");
-		localStorage.removeItem("deebo_user");
-		setToken(null);
-		setUser(null);
-		setError("");
-	};
-
-	const handleAuthSuccess = (data) => {
-		setToken(data.access_token);
-		setUser(data.user);
-		localStorage.setItem("deebo_token", data.access_token);
-		localStorage.setItem("deebo_user", JSON.stringify(data.user));
-		setShowAuth(false);
-	};
-
 	const handleApiError = (err) => {
-		if (err instanceof ApiError && err.status === 401) {
-			handleSignOut();
-			setError("Your session expired. Sign in again.");
-			return;
-		}
 		setError(
 			err instanceof ApiError
 				? err.message
@@ -219,8 +184,6 @@ export default function App() {
 
 	const openStats = () => setShowStats(true);
 	const closeStats = () => setShowStats(false);
-	const openAuth = () => setShowAuth(true);
-	const closeAuth = () => setShowAuth(false);
 
 	const navigate = (step) => {
 		if (step === "profile") {
@@ -254,16 +217,6 @@ export default function App() {
 	};
 
 	const isLegal = view === "privacy" || view === "terms";
-	const initial = (
-		user?.profile?.display_name ||
-		user?.name ||
-		user?.username ||
-		"S"
-	)
-		.trim()
-		.charAt(0);
-	const displayName =
-		user?.profile?.display_name || user?.name || user?.username || "Student";
 
 	const renderScreen = () => {
 		if (isLegal) {
@@ -349,29 +302,6 @@ export default function App() {
 					>
 						Stats
 					</button>
-					{user ? (
-						<div className="user-menu">
-							<span className="avatar" aria-hidden="true">
-								{initial}
-							</span>
-							<span className="user-menu__name">{displayName}</span>
-							<button
-								type="button"
-								className="btn btn--text btn--sm"
-								onClick={handleSignOut}
-							>
-								Sign out
-							</button>
-						</div>
-					) : (
-						<button
-							type="button"
-							className="btn btn--ghost btn--sm"
-							onClick={openAuth}
-						>
-							Sign in
-						</button>
-					)}
 				</div>
 			</header>
 
@@ -429,11 +359,6 @@ export default function App() {
 				<span>Deebo's College</span>
 			</footer>
 
-			<AuthModal
-				isOpen={showAuth}
-				onClose={closeAuth}
-				onSuccess={handleAuthSuccess}
-			/>
 			<StatsModal isOpen={showStats} onClose={closeStats} token={token} />
 		</div>
 	);
